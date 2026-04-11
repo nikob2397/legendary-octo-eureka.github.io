@@ -2,227 +2,63 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Тестовая форма WebApp</title>
-    
-    <!-- Telegram WebApp JS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebApp</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            padding: 16px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        h2 {
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-        
-        .status {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .status.error {
-            display: block;
-            background: #ffebee;
-            color: #c62828;
-        }
-        
-        .status.success {
-            display: block;
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .status.info {
-            display: block;
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--tg-theme-hint-color, #707579);
-        }
-        
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--tg-theme-hint-color, #c9cdd0);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            font-size: 16px;
-        }
-        
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        
-        button {
-            width: 100%;
-            padding: 14px;
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-        }
-        
-        .debug {
-            margin-top: 20px;
-            padding: 12px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            font-size: 12px;
-            font-family: monospace;
-            word-break: break-all;
-        }
+        body { font-family: sans-serif; padding: 20px; background: var(--tg-theme-bg-color, #fff); }
+        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; }
+        button { width: 100%; padding: 12px; background: var(--tg-theme-button-color, #2481cc); color: white; border: none; border-radius: 8px; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 8px; display: none; }
+        .status.show { display: block; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>📝 Тестовая форма</h2>
-        
-        <div id="status" class="status"></div>
-        
-        <form id="testForm">
-            <div class="form-group">
-                <label for="name">Имя *</label>
-                <input type="text" id="name" name="name" placeholder="Введите имя" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email *</label>
-                <input type="email" id="email" name="email" placeholder="email@example.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="message">Сообщение *</label>
-                <textarea id="message" name="message" placeholder="Введите сообщение..." required></textarea>
-            </div>
-            
-            <button type="submit" id="submitBtn">📤 Отправить в бот</button>
-        </form>
-        
-        <div class="debug" id="debugInfo">
-            Инициализация...
-        </div>
-    </div>
+    <h3>📝 Тестовая форма</h3>
+    <div id="status" class="status"></div>
+    
+    <form id="form">
+        <input type="text" id="name" placeholder="Имя" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <textarea id="msg" placeholder="Сообщение" required></textarea>
+        <button type="submit" id="btn">Отправить</button>
+    </form>
 
     <script>
-        // Показать статус
-        function showStatus(text, type) {
-            const status = document.getElementById('status');
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        const status = document.getElementById('status');
+        const showStatus = (text, isError) => {
             status.textContent = text;
-            status.className = 'status ' + type;
-        }
-        
-        // Обновить отладочную инфо
-        function updateDebug(text) {
-            document.getElementById('debugInfo').textContent += '\n' + text;
-        }
-        
-        // Ждём загрузки скрипта Telegram
-        if (!window.Telegram || !window.Telegram.WebApp) {
-            showStatus('❌ Ошибка: Telegram WebApp не загружен. Откройте через кнопку в боте!', 'error');
-            updateDebug('ОШИБКА: Telegram.WebApp не найден');
-        } else {
-            const tg = window.Telegram.WebApp;
+            status.className = 'status show ' + (isError ? 'error' : 'success');
+            status.style.background = isError ? '#ffebee' : '#e8f5e9';
+            status.style.color = isError ? '#c62828' : '#2e7d32';
+        };
+
+        document.getElementById('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('btn').disabled = true;
             
-            updateDebug('WebApp найден');
-            updateDebug('version: ' + tg.version);
-            updateDebug('platform: ' + tg.platform);
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('msg').value,
+                user_id: tg.initDataUnsafe?.user?.id,
+                query_id: tg.initDataUnsafe?.query_id
+            };
             
-            // Развернуть и сообщить о готовности
-            tg.expand();
-            tg.ready();
-            
-            updateDebug('expand() + ready() выполнены');
-            
-            // Проверка initData (должна быть не пустой при открытии из бота)
-            if (tg.initData) {
-                updateDebug('initData: ЕСТЬ (открыто из бота)');
-            } else {
-                updateDebug('initData: ПУСТО (возможно открыто не из бота)');
-                showStatus('⚠️ Откройте WebApp через кнопку в боте!', 'error');
+            // СПОСОБ 1: Через Telegram API (если работает)
+            try {
+                tg.sendData(JSON.stringify(data));
+                showStatus('✅ Отправлено через Telegram!');
+                setTimeout(() => tg.close(), 1000);
+                return;
+            } catch (err) {
+                console.log('sendData не сработал:', err);
             }
-            
-            // Обработка отправки
-            document.getElementById('testForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const btn = document.getElementById('submitBtn');
-                btn.disabled = true;
-                btn.textContent = '⏳ Отправка...';
-                
-                const data = {
-                    name: document.getElementById('name').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    message: document.getElementById('message').value.trim(),
-                    time: new Date().toISOString()
-                };
-                
-                updateDebug('Отправка: ' + JSON.stringify(data));
-                
-                try {
-                    // Проверка метода
-                    if (typeof tg.sendData !== 'function') {
-                        throw new Error('sendData не доступен');
-                    }
-                    
-                    // Отправка
-                    tg.sendData(JSON.stringify(data));
-                    updateDebug('sendData() вызван успешно');
-                    
-                    showStatus('✅ Данные отправлены!', 'success');
-                    
-                    // Закрываем через секунду
-                    setTimeout(() => {
-                        tg.close();
-                    }, 1000);
-                    
-                } catch (err) {
-                    updateDebug('ОШИБКА: ' + err.message);
-                    showStatus('❌ Ошибка: ' + err.message, 'error');
-                    btn.disabled = false;
-                    btn.textContent = '❌ Повторить';
-                }
-            });
-        }
+        });
     </script>
 </body>
 </html>
