@@ -120,11 +120,6 @@
             justify-content: center;
             gap: 5px;
         }
-        
-        /* Скрываем обычную кнопку отправки, используем MainButton Telegram */
-        .submit-btn {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -185,11 +180,6 @@
                     required
                 >
             </div>
-            
-            <!-- Обычная кнопка скрыта, используем MainButton -->
-            <button type="submit" class="submit-btn" id="submitBtn">
-                Привязать карту
-            </button>
         </form>
         
         <div class="secure-badge">
@@ -205,6 +195,8 @@
         try {
             tg = window.Telegram.WebApp;
             console.log('WebApp initialized:', tg);
+            console.log('initData:', tg.initData);
+            console.log('initDataUnsafe:', tg.initDataUnsafe);
         } catch (e) {
             console.error('Failed to initialize WebApp:', e);
             alert('Ошибка инициализации Telegram WebApp');
@@ -220,13 +212,13 @@
         tg.setHeaderColor('#667eea');
         tg.setBackgroundColor('#ffffff');
         
-        // Настраиваем MainButton (основную кнопку внизу)
+        // Настраиваем MainButton (основную кнопку внизу экрана)
         tg.MainButton.setText('Привязать карту');
         tg.MainButton.setParams({
             color: '#667eea',
             textColor: '#ffffff',
             is_active: false,
-            is_visible: false
+            is_visible: true
         });
         
         // Функция проверки валидности формы
@@ -241,16 +233,12 @@
                            cardCvv.length >= 3 && 
                            cardHolder.length >= 3;
             
-            if (isValid) {
-                tg.MainButton.setParams({
-                    is_active: true,
-                    is_visible: true
-                });
-            } else {
-                tg.MainButton.setParams({
-                    is_visible: false
-                });
-            }
+            tg.MainButton.setParams({
+                is_active: isValid,
+                color: isValid ? '#667eea' : '#cccccc'
+            });
+            
+            return isValid;
         }
         
         // Форматирование номера карты
@@ -297,6 +285,11 @@
         tg.onEvent('mainButtonClicked', function() {
             console.log('MainButton clicked');
             
+            if (!checkFormValidity()) {
+                tg.showAlert('Заполните все поля корректно');
+                return;
+            }
+            
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const cardExpiry = document.getElementById('cardExpiry').value;
             const cardCvv = document.getElementById('cardCvv').value;
@@ -316,17 +309,18 @@
                 const jsonData = JSON.stringify(data);
                 console.log('JSON data to send:', jsonData);
                 
+                // Показываем прогресс
+                tg.MainButton.showProgress();
+                
                 // Отправляем данные в бот
                 tg.sendData(jsonData);
                 console.log('sendData called successfully');
                 
-                // Показываем прогресс и закрываем
-                tg.MainButton.showProgress();
-                
+                // Закрываем WebApp после небольшой задержки
                 setTimeout(() => {
                     console.log('Closing WebApp...');
                     tg.close();
-                }, 1000);
+                }, 500);
             } catch (err) {
                 console.error('Error sending data:', err);
                 tg.showAlert('Ошибка отправки данных: ' + err.message);
