@@ -2,62 +2,245 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WebApp Form</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: var(--tg-theme-bg-color, #fff); }
-        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; }
-        button { width: 100%; padding: 12px; background: var(--tg-theme-button-color, #2481cc); color: white; border: none; border-radius: 8px; }
-        .status { margin: 10px 0; padding: 10px; border-radius: 8px; display: none; }
-        .status.show { display: block; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        /* Блок с данными инициализации Telegram */
+        .telegram-data {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-left: 4px solid #0088cc;
+        }
+
+        .telegram-data h3 {
+            color: #0088cc;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .data-label {
+            color: #666;
+        }
+
+        .data-value {
+            color: #333;
+            font-weight: 500;
+            max-width: 60%;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success {
+            text-align: center;
+            color: #27ae60;
+            font-size: 16px;
+            margin-top: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h3>📝 Тестовая форма</h3>
-    <div id="status" class="status"></div>
-    
-    <form id="form">
-        <input type="text" id="name" placeholder="Имя" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <textarea id="msg" placeholder="Сообщение" required></textarea>
-        <button type="submit" id="btn">Отправить</button>
-    </form>
+    <div class="container">
+        <h1>📝 Введите ваше имя</h1>
+        
+        <!-- Блок с данными инициализации Telegram -->
+        <div class="telegram-data" id="telegramData">
+            <h3>📱 Данные Telegram</h3>
+            <div class="data-row">
+                <span class="data-label">ID:</span>
+                <span class="data-value" id="userId">-</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Имя:</span>
+                <span class="data-value" id="userFirstName">-</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Фамилия:</span>
+                <span class="data-value" id="userLastName">-</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Username:</span>
+                <span class="data-value" id="userUsername">-</span>
+            </div>
+        </div>
+
+        <form id="nameForm">
+            <div class="form-group">
+                <label for="nameInput">Ваше имя</label>
+                <input 
+                    type="text" 
+                    id="nameInput" 
+                    placeholder="Введите имя..." 
+                    required
+                    autocomplete="off"
+                >
+                <div class="error" id="errorMsg">Пожалуйста, введите имя</div>
+            </div>
+            
+            <button type="submit">✈️ Отправить</button>
+        </form>
+        
+        <div class="success" id="successMsg">✅ Имя успешно отправлено!</div>
+    </div>
 
     <script>
+        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
         
-        const status = document.getElementById('status');
-        const showStatus = (text, isError) => {
-            status.textContent = text;
-            status.className = 'status show ' + (isError ? 'error' : 'success');
-            status.style.background = isError ? '#ffebee' : '#e8f5e9';
-            status.style.color = isError ? '#c62828' : '#2e7d32';
-        };
+        // Настройка WebApp
+        tg.ready();
+        tg.expand();
+        
+        // Установка цвета шапки
+        tg.setHeaderColor('#667eea');
+        tg.setBackgroundColor('#ffffff');
 
-        document.getElementById('form').addEventListener('submit', async (e) => {
+        // Получаем данные пользователя
+        const initData = tg.initDataUnsafe;
+        
+        // Отображаем данные инициализации
+        if (initData.user) {
+            document.getElementById('userId').textContent = initData.user.id || '-';
+            document.getElementById('userFirstName').textContent = initData.user.first_name || '-';
+            document.getElementById('userLastName').textContent = initData.user.last_name || '-';
+            document.getElementById('userUsername').textContent = initData.user.username ? '@' + initData.user.username : '-';
+        }
+
+        // Обработка отправки формы
+        document.getElementById('nameForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            document.getElementById('btn').disabled = true;
             
-            const data = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                message: document.getElementById('msg').value,
-                user_id: tg.initDataUnsafe?.user?.id,
-                query_id: tg.initDataUnsafe?.query_id
-            };
+            const nameInput = document.getElementById('nameInput');
+            const name = nameInput.value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
             
-            // СПОСОБ 1: Через Telegram API (если работает)
-            try {
-                tg.sendData(JSON.stringify(data));
-                showStatus('✅ Отправлено через Telegram!');
-                setTimeout(() => tg.close(), 1000);
+            // Валидация
+            if (!name) {
+                errorMsg.style.display = 'block';
+                nameInput.style.borderColor = '#e74c3c';
                 return;
-            } catch (err) {
-                console.log('sendData не сработал:', err);
             }
+            
+            // Скрываем ошибку
+            errorMsg.style.display = 'none';
+            nameInput.style.borderColor = '#e0e0e0';
+            
+            // Отправляем данные боту
+            tg.sendData(name);
+            
+            // Показываем успех
+            successMsg.style.display = 'block';
+            
+            // Закрываем WebApp через 1 секунду
+            setTimeout(() => {
+                tg.close();
+            }, 1000);
+        });
+
+        // Скрываем ошибку при вводе
+        document.getElementById('nameInput').addEventListener('input', function() {
+            document.getElementById('errorMsg').style.display = 'none';
+            this.style.borderColor = '#e0e0e0';
         });
     </script>
 </body>
