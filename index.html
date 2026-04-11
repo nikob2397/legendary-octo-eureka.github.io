@@ -246,7 +246,15 @@
 
     <script>
         // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
+        let tg;
+        
+        try {
+            tg = window.Telegram.WebApp;
+            console.log('WebApp initialized:', tg);
+        } catch (e) {
+            console.error('Failed to initialize WebApp:', e);
+            alert('Ошибка инициализации Telegram WebApp');
+        }
         
         // Расширяем на весь экран
         tg.expand();
@@ -338,20 +346,25 @@
                 card_holder: cardHolder
             };
             
-            // Отправляем данные в бот
-            console.log('Sending data to bot:', data);
+            console.log('Preparing to send data:', data);
+            console.log('tg.sendData available:', typeof tg.sendData);
             
+            // Отправляем данные в бот
             try {
-                tg.sendData(JSON.stringify(data));
-                console.log('Data sent successfully');
+                const jsonData = JSON.stringify(data);
+                console.log('JSON data:', jsonData);
                 
-                // Закрываем WebApp через небольшую задержку
+                tg.sendData(jsonData);
+                console.log('sendData called successfully');
+                
+                // Закрываем WebApp
                 setTimeout(() => {
+                    console.log('Closing WebApp...');
                     tg.close();
                 }, 500);
             } catch (err) {
                 console.error('Error sending data:', err);
-                tg.showAlert('Ошибка отправки данных. Попробуйте снова.');
+                tg.showAlert('Ошибка отправки данных: ' + err.message);
             }
         });
     </script>
