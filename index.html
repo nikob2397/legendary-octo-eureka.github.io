@@ -227,7 +227,7 @@
 
     <script>
         // ==================== КРИПТОГРАФИЯ ====================
-        
+
         const SECRET_KEY = "key12415";
 
         async function sha256(message) {
@@ -237,13 +237,9 @@
             return new Uint8Array(hashBuffer);
         }
 
-        // ИСПРАВЛЕННАЯ функция base64 URL-safe decode
         function base64UrlDecode(str) {
-            // Добавляем padding
             const pad = str.length % 4;
-            if (pad) {
-                str += '='.repeat(4 - pad);
-            }
+            if (pad) str += '='.repeat(4 - pad);
             str = str.replace(/\-/g, '+').replace(/\_/g, '/');
             const binary = atob(str);
             const bytes = new Uint8Array(binary.length);
@@ -253,36 +249,59 @@
             return bytes;
         }
 
+        // ======== ИСПРАВЛЕННЫЕ ФУНКЦИИ ЧТЕНИЯ ========
+        // Ключевое исправление: используем DataView напрямую на копии байтов
+
         function readFloat32(bytes, offset) {
-            const buffer = new ArrayBuffer(4);
-            const view = new DataView(buffer);
-            for (let i = 0; i < 4; i++) view.setUint8(i, bytes[offset + i]);
-            return view.getFloat32(0, true);
+            const buf = new ArrayBuffer(4);
+            new Uint8Array(buf).set(bytes.slice(offset, offset + 4));
+            return new DataView(buf).getFloat32(0, true);
+        }
+
+        function readUint64(bytes, offset) {
+            const buf = new ArrayBuffer(8);
+            new Uint8Array(buf).set(bytes.slice(offset, offset + 8));
+            const view = new DataView(buf);
+            const low = view.getUint32(0, true);
+            const high = view.getUint32(4, true);
+            return (BigInt(high) << BigInt(32)) | BigInt(low);
         }
 
         function readUint32(bytes, offset) {
-            const buffer = new ArrayBuffer(4);
-            const view = new DataView(buffer);
-            for (let i = 0; i < 4; i++) view.setUint8(i, bytes[offset + i]);
-            return view.getUint32(0, true);
+            const buf = new ArrayBuffer(4);
+            new Uint8Array(buf).set(bytes.slice(offset, offset + 4));
+            return new DataView(buf).getUint32(0, true);
         }
 
         async function decryptCheck(token) {
             try {
                 const key = await sha256(SECRET_KEY);
                 const encrypted = base64UrlDecode(token);
-                
-                if (encrypted.length !== 12) return null;
-                
-                const decrypted = new Uint8Array(12);
-                for (let i = 0; i < 12; i++) {
+
+                if (encrypted.length !== 16) {
+                    console.error("Wrong length:", encrypted.length, "expected 16");
+                    return null;
+                }
+
+                const decrypted = new Uint8Array(16);
+                for (let i = 0; i < 16; i++) {
                     decrypted[i] = encrypted[i] ^ key[i % key.length];
                 }
-                
+
+                const sum = readFloat32(decrypted, 0);
+                const user_id = Number(readUint64(decrypted, 4));
+                const check_id = readUint32(decrypted, 12);
+
+                // Валидация: float должен быть разумным
+                if (isNaN(sum) || sum < 0 || sum > 1000000) {
+                    console.error("Invalid sum:", sum);
+                    return null;
+                }
+
                 return {
-                    sum: Math.round(readFloat32(decrypted, 0) * 100) / 100,
-                    user_id: readUint32(decrypted, 4),
-                    check_id: readUint32(decrypted, 8)
+                    sum: Math.round(sum * 100) / 100,
+                    user_id: user_id,
+                    check_id: check_id
                 };
             } catch (e) {
                 console.error('Decrypt error:', e);
@@ -383,12 +402,12 @@
 
         async function processCheck(token) {
             if (!token) return;
-            
+
             if (!currentUserId) {
                 showToast('Ошибка: не удалось определить пользователя', 'error');
                 return;
             }
-            
+
             const data = await decryptCheck(token);
             if (!data) {
                 showToast('Неверный или повреждённый чек', 'error');
@@ -408,7 +427,7 @@
             userData.balance += data.sum;
             userData.usedChecks.push(data.check_id);
             saveUserData(currentUserId, userData);
-            
+
             updateBalanceDisplay();
             showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
 
