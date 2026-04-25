@@ -389,7 +389,6 @@
         }
 
         // Загружаем или создаём данные ТЕКУЩЕГО пользователя
-        // Данные других пользователей НЕ трогаем!
         if (currentUserId) {
             userData = loadUserData(currentUserId);
             if (!userData) {
@@ -400,7 +399,6 @@
                 };
                 saveUserData(currentUserId, userData);
             }
-            // Гарантируем наличие transactions для старых данных
             if (!userData.transactions) {
                 userData.transactions = [];
             }
@@ -452,12 +450,10 @@
                 return;
             }
             
-            // Сортируем по дате (новые сверху)
             const sorted = [...userData.transactions].sort((a, b) => 
                 new Date(b.date) - new Date(a.date)
             );
             
-            // Берём последние 10
             const recent = sorted.slice(0, 10);
             
             let html = '<div class="history-list">';
@@ -522,11 +518,9 @@
                 return;
             }
 
-            // Зачисляем
             userData.balance += data.sum;
             userData.usedChecks.push(data.check_id);
             
-            // Добавляем в историю
             userData.transactions.push({
                 date: new Date().toISOString(),
                 type: 'income',
@@ -545,9 +539,21 @@
             }
         }
 
+        // ====== ИСПРАВЛЕНИЕ: защита от кэшированного start_param ======
+        // Проверяем, что initData НЕ пустой — значит приложение открыто через Telegram
+        // Если initData пустой, значит это просто обновление страницы, не новое открытие с чеком
+        const initData = tg.initData;
         const startParam = tg.initDataUnsafe?.start_param;
-        if (startParam) {
-            processCheck(startParam);
+        
+        // Обрабатываем чек ТОЛЬКО если initData не пустой (гарантия свежего открытия)
+        // И startParam реально существует
+        if (initData && startParam && startParam.trim() !== '') {
+            // Дополнительная проверка: не обрабатывали ли мы уже этот чек в этой сессии
+            const lastProcessed = sessionStorage.getItem('last_processed_check');
+            if (lastProcessed !== startParam) {
+                sessionStorage.setItem('last_processed_check', startParam);
+                processCheck(startParam);
+            }
         }
 
         // ==================== QR-СКАНЕР ====================
