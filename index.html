@@ -14,6 +14,8 @@
             color: var(--tg-theme-text-color, #ffffff);
             min-height: 100vh;
             padding: 16px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .profile-header {
@@ -63,18 +65,120 @@
         .btn-primary { background-color: var(--tg-theme-button-color, #2b9ce1); color: var(--tg-theme-button-text-color, #ffffff); }
         .btn-secondary { background-color: var(--tg-theme-secondary-bg-color, #242f3d); color: var(--tg-theme-text-color, #ffffff); }
 
-        /* === ИСТОРИЯ НА ГЛАВНОМ ЭКРАНЕ (фиксированный размер, 3 элемента) === */
+        /* ===== КАРУСЕЛЬ БАННЕРОВ ===== */
+        .banners-carousel {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .banners-track {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 8px;
+        }
+        .banners-track::-webkit-scrollbar { display: none; }
+
+        .banner-slide {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+        }
+
+        .banner-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 6px solid;
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .banner-card:active { opacity: 0.8; }
+
+        .banner-card.blue {
+            border-left-color: #2b9ce1;
+            background: linear-gradient(135deg, rgba(43, 156, 225, 0.15) 0%, var(--tg-theme-secondary-bg-color, #242f3d) 100%);
+        }
+        .banner-card.green {
+            border-left-color: #27ae60;
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, var(--tg-theme-secondary-bg-color, #242f3d) 100%);
+        }
+
+        .banner-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .banner-icon svg { width: 100%; height: 100%; }
+
+        .banner-content { flex: 1; min-width: 0; }
+        .banner-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .banner-card.blue .banner-title { color: #2b9ce1; }
+        .banner-card.green .banner-title { color: #27ae60; }
+        .banner-desc {
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #ffffff);
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        .banner-arrow {
+            width: 24px; height: 24px;
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+        .banner-arrow svg {
+            width: 100%; height: 100%;
+            fill: none;
+            stroke: var(--tg-theme-text-color, #fff);
+            stroke-width: 2;
+        }
+
+        .banners-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .banner-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-hint-color, #7d8b99);
+            opacity: 0.4;
+            transition: all 0.3s;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .banner-dot.active {
+            opacity: 1;
+            background-color: var(--tg-theme-button-color, #2b9ce1);
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        /* ===== ИСТОРИЯ НА ГЛАВНОМ ЭКРАНЕ ===== */
         .history-section {
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
             border-radius: 24px;
             padding: 20px;
-            /* Фиксированная высота под 3 элемента + заголовок */
             min-height: 280px;
             max-height: 280px;
             display: flex;
             flex-direction: column;
         }
-        
+
         .history-header { 
             display: flex; 
             justify-content: space-between; 
@@ -98,7 +202,7 @@
             gap: 8px;
             overflow: hidden;
         }
-        
+
         .history-item {
             display: flex;
             align-items: center;
@@ -109,7 +213,7 @@
             flex-shrink: 0;
             height: 60px;
         }
-        
+
         .history-item-left { display: flex; align-items: center; gap: 10px; }
         .history-icon {
             width: 36px; height: 36px; border-radius: 50%;
@@ -120,11 +224,11 @@
         .history-icon.income svg { fill: #27ae60; width: 18px; height: 18px; }
         .history-icon.outcome { background-color: rgba(231, 76, 60, 0.2); }
         .history-icon.outcome svg { fill: #e74c3c; width: 18px; height: 18px; }
-        
+
         .history-info { display: flex; flex-direction: column; }
         .history-desc { font-size: 14px; font-weight: 500; }
         .history-date { font-size: 11px; color: var(--tg-theme-hint-color, #7d8b99); margin-top: 1px; }
-        
+
         .history-amount { font-size: 15px; font-weight: 600; }
         .history-amount.income { color: #27ae60; }
         .history-amount.outcome { color: #e74c3c; }
@@ -140,7 +244,7 @@
             font-size: 15px;
         }
 
-        /* === ЭКРАН ВСЕХ ОПЕРАЦИЙ === */
+        /* ===== ЭКРАН ВСЕХ ОПЕРАЦИЙ ===== */
         .all-history-screen {
             display: none;
             position: fixed;
@@ -158,9 +262,9 @@
             gap: 16px;
             border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #242f3d);
         }
-        
+
         .back-btn {
-            width: 40px; height: 40px; border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 50%;
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
             border: none;
             display: flex; align-items: center; justify-content: center;
@@ -168,7 +272,7 @@
             flex-shrink: 0;
         }
         .back-btn svg { width: 20px; height: 20px; stroke: var(--tg-theme-text-color, #fff); stroke-width: 2; fill: none; }
-        
+
         .all-history-title { font-size: 20px; font-weight: 700; }
 
         .all-history-list {
@@ -188,7 +292,7 @@
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
             border-radius: 14px;
         }
-        
+
         .all-history-item-left { display: flex; align-items: center; gap: 12px; }
         .all-history-icon {
             width: 44px; height: 44px; border-radius: 50%;
@@ -199,11 +303,11 @@
         .all-history-icon.income svg { fill: #27ae60; width: 22px; height: 22px; }
         .all-history-icon.outcome { background-color: rgba(231, 76, 60, 0.2); }
         .all-history-icon.outcome svg { fill: #e74c3c; width: 22px; height: 22px; }
-        
+
         .all-history-info { display: flex; flex-direction: column; }
         .all-history-desc { font-size: 15px; font-weight: 500; }
         .all-history-date { font-size: 12px; color: var(--tg-theme-hint-color, #7d8b99); margin-top: 2px; }
-        
+
         .all-history-amount { font-size: 16px; font-weight: 600; }
         .all-history-amount.income { color: #27ae60; }
         .all-history-amount.outcome { color: #e74c3c; }
@@ -217,7 +321,7 @@
             font-size: 16px;
         }
 
-        /* === QR ЭКРАН === */
+        /* ===== QR ЭКРАН ===== */
         .qr-screen {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--tg-theme-bg-color, #1a1d29); z-index: 1000;
@@ -294,6 +398,65 @@
             <div class="actions">
                 <button class="btn btn-primary">+ Пополнить</button>
                 <button class="btn btn-secondary">Перевести</button>
+            </div>
+        </div>
+
+        <!-- ===== КАРУСЕЛЬ БАННЕРОВ ===== -->
+        <div class="banners-carousel">
+            <div class="banners-track" id="bannersTrack">
+
+                <!-- Баннер 1: QR оплата -->
+                <div class="banner-slide">
+                    <div class="banner-card blue" id="bannerQr">
+                        <div class="banner-icon">
+                            <svg width="56" height="56" viewBox="0 0 97 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/>
+                                <path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/>
+                                <path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/>
+                                <path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/>
+                                <path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/>
+                                <path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/>
+                                <path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/>
+                                <path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/>
+                            </svg>
+                        </div>
+                        <div class="banner-content">
+                            <div class="banner-title">Оплата по QR-коду</div>
+                            <div class="banner-desc">Оплачивайте любые покупки с помощью криптовалюты.</div>
+                        </div>
+                        <div class="banner-arrow">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Баннер 2: Весенний фестиваль -->
+                <div class="banner-slide">
+                    <div class="banner-card green" id="bannerFest">
+                        <div class="banner-icon">
+                            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="56" height="56" rx="14" fill="#1a3a1a"/>
+                                <text x="28" y="38" text-anchor="middle" font-size="32"><img src="https://emoji-cdn.mqrio.dev/💸?style=telegram" width="100%"></text>
+                            </svg>
+                        </div>
+                        <div class="banner-content">
+                            <div class="banner-title">Весенний фестиваль</div>
+                            <div class="banner-desc">Криптовалютные подарки всем активным пользователям!</div>
+                        </div>
+                        <div class="banner-arrow">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="banners-dots" id="bannersDots">
+                <button class="banner-dot active" data-index="0"></button>
+                <button class="banner-dot" data-index="1"></button>
             </div>
         </div>
 
@@ -390,7 +553,7 @@
 
     <script>
         // ==================== КРИПТОГРАФИЯ ====================
-        
+
         const SECRET_KEY = "key12415";
 
         async function sha256(message) {
@@ -437,26 +600,26 @@
             try {
                 const key = await sha256(SECRET_KEY);
                 const encrypted = base64UrlDecode(token);
-                
+
                 if (encrypted.length !== 16) {
                     console.error("Wrong length:", encrypted.length, "expected 16");
                     return null;
                 }
-                
+
                 const decrypted = new Uint8Array(16);
                 for (let i = 0; i < 16; i++) {
                     decrypted[i] = encrypted[i] ^ key[i % key.length];
                 }
-                
+
                 const sum = readFloat32(decrypted, 0);
                 const user_id = Number(readUint64(decrypted, 4));
                 const check_id = readUint32(decrypted, 12);
-                
+
                 if (isNaN(sum) || sum < 0 || sum > 1000000) {
                     console.error("Invalid sum:", sum);
                     return null;
                 }
-                
+
                 return {
                     sum: Math.round(sum * 100) / 100,
                     user_id: user_id,
@@ -547,7 +710,7 @@
             const d = new Date(dateStr);
             const now = new Date();
             const isToday = d.toDateString() === now.toDateString();
-            
+
             if (isToday) {
                 return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             }
@@ -561,7 +724,6 @@
             }) + ' ₽';
         }
 
-        // Рендер одного элемента истории (мини — для главного экрана)
         function renderMiniHistoryItem(tx) {
             const isIncome = tx.type === 'income';
             const iconClass = isIncome ? 'income' : 'outcome';
@@ -570,7 +732,7 @@
             const iconSvg = isIncome 
                 ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
                 : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
-            
+
             return `
                 <div class="history-item">
                     <div class="history-item-left">
@@ -585,7 +747,6 @@
             `;
         }
 
-        // Рендер одного элемента истории (полный — для экрана всех операций)
         function renderFullHistoryItem(tx) {
             const isIncome = tx.type === 'income';
             const iconClass = isIncome ? 'income' : 'outcome';
@@ -594,7 +755,7 @@
             const iconSvg = isIncome 
                 ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
                 : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
-            
+
             return `
                 <div class="all-history-item">
                     <div class="all-history-item-left">
@@ -609,22 +770,20 @@
             `;
         }
 
-        // Рендер мини-истории (главный экран, макс 3)
         function renderMiniHistory() {
             const container = document.getElementById('historyContent');
-            
+
             if (!userData.transactions || userData.transactions.length === 0) {
                 container.innerHTML = '<div class="history-empty">Нет операций</div>';
                 return;
             }
-            
+
             const sorted = [...userData.transactions].sort((a, b) => 
                 new Date(b.date) - new Date(a.date)
             );
-            
-            // Только 3 последних
+
             const recent = sorted.slice(0, 3);
-            
+
             let html = '<div class="history-list">';
             for (const tx of recent) {
                 html += renderMiniHistoryItem(tx);
@@ -633,19 +792,18 @@
             container.innerHTML = html;
         }
 
-        // Рендер полной истории (экран "Все")
         function renderFullHistory() {
             const container = document.getElementById('allHistoryContent');
-            
+
             if (!userData.transactions || userData.transactions.length === 0) {
                 container.innerHTML = '<div class="all-history-empty">Нет операций</div>';
                 return;
             }
-            
+
             const sorted = [...userData.transactions].sort((a, b) => 
                 new Date(b.date) - new Date(a.date)
             );
-            
+
             let html = '';
             for (const tx of sorted) {
                 html += renderFullHistoryItem(tx);
@@ -666,12 +824,12 @@
 
         async function processCheck(token) {
             if (!token) return;
-            
+
             if (!currentUserId) {
                 showToast('Ошибка: не удалось определить пользователя', 'error');
                 return;
             }
-            
+
             const data = await decryptCheck(token);
             if (!data) {
                 showToast('Неверный или повреждённый чек', 'error');
@@ -690,16 +848,16 @@
 
             userData.balance += data.sum;
             userData.usedChecks.push(data.check_id);
-            
+
             userData.transactions.push({
                 date: new Date().toISOString(),
                 type: 'income',
                 amount: data.sum,
                 description: 'Активация чека'
             });
-            
+
             saveUserData(currentUserId, userData);
-            
+
             updateBalanceDisplay();
             renderMiniHistory();
             showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
@@ -712,7 +870,7 @@
         // Обработка startapp
         const initData = tg.initData;
         const startParam = tg.initDataUnsafe?.start_param;
-        
+
         if (initData && startParam && startParam.trim() !== '') {
             const lastProcessed = sessionStorage.getItem('last_processed_check');
             if (lastProcessed !== startParam) {
@@ -720,6 +878,35 @@
                 processCheck(startParam);
             }
         }
+
+        // ==================== КАРУСЕЛЬ БАННЕРОВ ====================
+
+        const bannersTrack = document.getElementById('bannersTrack');
+        const bannersDots = document.getElementById('bannersDots');
+        const dots = bannersDots.querySelectorAll('.banner-dot');
+
+        // Обновление точек при скролле
+        bannersTrack.addEventListener('scroll', () => {
+            const slideWidth = bannersTrack.offsetWidth;
+            const index = Math.round(bannersTrack.scrollLeft / slideWidth);
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        });
+
+        // Клик по точкам
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const index = parseInt(dot.dataset.index);
+                const slideWidth = bannersTrack.offsetWidth;
+                bannersTrack.scrollTo({ left: index * slideWidth, behavior: 'smooth' });
+            });
+        });
+
+        // Клик по баннеру QR
+        document.getElementById('bannerQr').addEventListener('click', () => {
+            qrScreen.classList.add('active');
+        });
 
         // ==================== НАВИГАЦИЯ ====================
 
