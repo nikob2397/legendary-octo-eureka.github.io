@@ -237,8 +237,13 @@
             return new Uint8Array(hashBuffer);
         }
 
+        // ИСПРАВЛЕННАЯ функция base64 URL-safe decode
         function base64UrlDecode(str) {
-            str += new Array(5 - str.length % 4).join('=');
+            // Добавляем padding
+            const pad = str.length % 4;
+            if (pad) {
+                str += '='.repeat(4 - pad);
+            }
             str = str.replace(/\-/g, '+').replace(/\_/g, '/');
             const binary = atob(str);
             const bytes = new Uint8Array(binary.length);
@@ -310,7 +315,6 @@
         }
 
         function clearOtherUsersData(currentUserId) {
-            // Удаляем данные других пользователей для безопасности
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -332,27 +336,22 @@
         let currentUserId = null;
         let userData = null;
 
-        // Определяем пользователя
         if (user && user.id) {
             currentUserId = user.id;
         } else {
-            // Fallback для тестирования вне Telegram
             currentUserId = parseInt(localStorage.getItem('debug_user_id') || '0') || null;
         }
 
-        // Загружаем/создаём данные пользователя
         if (currentUserId) {
             userData = loadUserData(currentUserId);
             if (!userData) {
                 userData = { balance: 0, usedChecks: [] };
             }
-            // Чистим данные других пользователей
             clearOtherUsersData(currentUserId);
         } else {
             userData = { balance: 0, usedChecks: [] };
         }
 
-        // Отображение профиля
         if (user) {
             const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
             document.getElementById('userName').textContent = fullName || 'Name';
@@ -396,19 +395,16 @@
                 return;
             }
 
-            // Проверка user_id
             if (data.user_id !== currentUserId) {
                 showToast('Этот чек предназначен для другого пользователя', 'error');
                 return;
             }
 
-            // Проверка на повторное использование
             if (userData.usedChecks.includes(data.check_id)) {
                 showToast('Этот чек уже был активирован', 'info');
                 return;
             }
 
-            // Активация чека
             userData.balance += data.sum;
             userData.usedChecks.push(data.check_id);
             saveUserData(currentUserId, userData);
@@ -416,13 +412,11 @@
             updateBalanceDisplay();
             showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
 
-            // Очищаем URL
             if (window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        // Обработка startapp
         const startParam = tg.initDataUnsafe?.start_param;
         if (startParam) {
             processCheck(startParam);
