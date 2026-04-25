@@ -16,7 +16,6 @@
             padding: 16px;
         }
 
-        /* === ГЛАВНЫЙ ЭКРАН === */
         .profile-header {
             display: flex;
             align-items: center;
@@ -25,29 +24,18 @@
         }
 
         .qr-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 50%;
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: opacity 0.2s;
+            border: none; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; transition: opacity 0.2s;
         }
         .qr-btn:active { opacity: 0.7; }
         .qr-btn svg { width: 24px; height: 24px; fill: var(--tg-theme-text-color, #ffffff); }
 
         .profile-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; gap: 12px;
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            border-radius: 24px;
-            padding: 6px 16px 6px 6px;
-            flex: 1;
+            border-radius: 24px; padding: 6px 16px 6px 6px; flex: 1;
         }
 
         .avatar {
@@ -69,8 +57,7 @@
 
         .btn {
             padding: 12px 24px; border-radius: 24px; border: none;
-            font-size: 15px; font-weight: 500; cursor: pointer;
-            transition: opacity 0.2s;
+            font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.2s;
         }
         .btn:active { opacity: 0.8; }
         .btn-primary { background-color: var(--tg-theme-button-color, #2b9ce1); color: var(--tg-theme-button-text-color, #ffffff); }
@@ -85,7 +72,6 @@
         .history-all { font-size: 15px; color: var(--tg-theme-button-color, #2b9ce1); cursor: pointer; }
         .history-empty { background-color: var(--tg-theme-bg-color, #17212b); border-radius: 16px; height: 200px; }
 
-        /* === ЭКРАН QR-ИНСТРУКЦИИ === */
         .qr-screen {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--tg-theme-bg-color, #1a1d29); z-index: 1000;
@@ -124,7 +110,6 @@
         }
         .qr-scan-btn:active { opacity: 0.8; }
 
-        /* === УВЕДОМЛЕНИЯ === */
         .toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
             background-color: var(--tg-theme-button-color, #2b9ce1);
@@ -139,7 +124,6 @@
 </head>
 <body>
 
-    <!-- ===== ГЛАВНЫЙ ЭКРАН ===== -->
     <div id="mainScreen">
         <div class="profile-header">
             <button class="qr-btn" id="qrBtn" title="QR-сканер">
@@ -174,7 +158,6 @@
         </div>
     </div>
 
-    <!-- ===== ЭКРАН QR-ИНСТРУКЦИИ ===== -->
     <div class="qr-screen" id="qrScreen">
         <button class="qr-close" id="qrClose">
             <svg viewBox="0 0 24 24">
@@ -239,30 +222,18 @@
         <button class="qr-scan-btn" id="startScan">Отсканировать QR-код</button>
     </div>
 
-    <!-- Toast уведомление -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // ==================== КРИПТОГРАФИЯ НА ФРОНТЕНДЕ ====================
+        // ==================== КРИПТОГРАФИЯ ====================
         
         const SECRET_KEY = "key12415";
 
-        // SHA-256 хеширование
         async function sha256(message) {
             const encoder = new TextEncoder();
             const data = encoder.encode(message);
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
             return new Uint8Array(hashBuffer);
-        }
-
-        // Base64 URL-safe encode/decode
-        function base64UrlEncode(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         }
 
         function base64UrlDecode(str) {
@@ -276,31 +247,48 @@
             return bytes;
         }
 
-        // XOR шифрование с ключом, производным из SECRET_KEY
-        async function encryptData(data) {
-            const key = await sha256(SECRET_KEY);
-            const dataBytes = new TextEncoder().encode(data);
-            const encrypted = new Uint8Array(dataBytes.length);
-            
-            for (let i = 0; i < dataBytes.length; i++) {
-                encrypted[i] = dataBytes[i] ^ key[i % key.length];
+        // Чтение float32 (little-endian)
+        function readFloat32(bytes, offset) {
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            for (let i = 0; i < 4; i++) {
+                view.setUint8(i, bytes[offset + i]);
             }
-            
-            return base64UrlEncode(encrypted);
+            return view.getFloat32(0, true);
         }
 
-        async function decryptData(token) {
+        // Чтение uint32 (little-endian)
+        function readUint32(bytes, offset) {
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            for (let i = 0; i < 4; i++) {
+                view.setUint8(i, bytes[offset + i]);
+            }
+            return view.getUint32(0, true);
+        }
+
+        async function decryptCheck(token) {
             try {
                 const key = await sha256(SECRET_KEY);
                 const encrypted = base64UrlDecode(token);
-                const decrypted = new Uint8Array(encrypted.length);
                 
-                for (let i = 0; i < encrypted.length; i++) {
+                if (encrypted.length !== 8) {
+                    return null; // Неверный формат
+                }
+                
+                // XOR
+                const decrypted = new Uint8Array(8);
+                for (let i = 0; i < 8; i++) {
                     decrypted[i] = encrypted[i] ^ key[i % key.length];
                 }
                 
-                return new TextDecoder().decode(decrypted);
+                // Распаковка: float32 + uint32
+                const sum = readFloat32(decrypted, 0);
+                const userId = readUint32(decrypted, 4);
+                
+                return { sum: Math.round(sum * 100) / 100, user_id: userId };
             } catch (e) {
+                console.error('Decrypt error:', e);
                 return null;
             }
         }
@@ -312,7 +300,6 @@
         tg.expand();
         tg.setHeaderColor(tg.themeParams.bg_color || '#17212b');
 
-        // Данные пользователя
         const user = tg.initDataUnsafe?.user;
         let currentUserId = null;
         let balance = parseFloat(localStorage.getItem('balance') || '0');
@@ -331,7 +318,6 @@
             }
         }
 
-        // Обновление баланса
         function updateBalanceDisplay() {
             document.getElementById('balance').textContent = balance.toLocaleString('ru-RU', {
                 minimumFractionDigits: 2,
@@ -340,7 +326,6 @@
         }
         updateBalanceDisplay();
 
-        // Toast уведомление
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -349,45 +334,31 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Обработка чека из startapp
         async function processCheck(token) {
             if (!token) return;
             
-            const decrypted = await decryptData(token);
-            if (!decrypted) {
+            const data = await decryptCheck(token);
+            if (!data) {
                 showToast('Неверный или повреждённый чек', 'error');
                 return;
             }
 
-            // Парсим параметры
-            const params = new URLSearchParams(decrypted);
-            const sum = parseFloat(params.get('sum'));
-            const checkUserId = parseInt(params.get('user_id'));
-
-            if (isNaN(sum) || isNaN(checkUserId)) {
-                showToast('Неверный формат чека', 'error');
-                return;
-            }
-
-            // Проверяем user_id
-            if (currentUserId && checkUserId !== currentUserId) {
+            if (currentUserId && data.user_id !== currentUserId) {
                 showToast('Этот чек предназначен для другого пользователя', 'error');
                 return;
             }
 
-            // Зачисляем
-            balance += sum;
+            balance += data.sum;
             localStorage.setItem('balance', balance.toString());
             updateBalanceDisplay();
-            showToast(`+${sum.toFixed(2)} ₽ зачислено!`, 'success');
+            showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
 
-            // Очищаем startapp из URL (чтобы не повторить при обновлении)
             if (window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        // Получаем startapp параметр из initDataUnsafe
+        // Обработка startapp
         const startParam = tg.initDataUnsafe?.start_param;
         if (startParam) {
             processCheck(startParam);
@@ -413,7 +384,6 @@
                 tg.showScanQrPopup({
                     text: 'Наведите камеру на QR-код оплаты'
                 }, async (text) => {
-                    // text — это зашифрованный токен из QR
                     await processCheck(text);
                     qrScreen.classList.remove('active');
                     return true;
@@ -425,4 +395,5 @@
     </script>
 
 </body>
-</html>
+        </html>
+    
