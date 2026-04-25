@@ -63,15 +63,21 @@
         .btn-primary { background-color: var(--tg-theme-button-color, #2b9ce1); color: var(--tg-theme-button-text-color, #ffffff); }
         .btn-secondary { background-color: var(--tg-theme-secondary-bg-color, #242f3d); color: var(--tg-theme-text-color, #ffffff); }
 
+        /* === ИСТОРИЯ НА ГЛАВНОМ ЭКРАНЕ (фиксированная, 3 операции) === */
         .history-section {
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            border-radius: 24px; padding: 20px;
+            border-radius: 24px;
+            padding: 20px;
+            min-height: 280px;
+            max-height: 280px;
+            display: flex;
+            flex-direction: column;
         }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0; }
         .history-title { font-size: 17px; font-weight: 600; }
         .history-all { font-size: 15px; color: var(--tg-theme-button-color, #2b9ce1); cursor: pointer; }
 
-        .history-list { display: flex; flex-direction: column; gap: 8px; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; }
         
         .history-item {
             display: flex;
@@ -80,6 +86,7 @@
             padding: 12px 16px;
             background-color: var(--tg-theme-bg-color, #17212b);
             border-radius: 12px;
+            flex-shrink: 0;
         }
         
         .history-item-left { display: flex; align-items: center; gap: 12px; }
@@ -104,7 +111,7 @@
         .history-empty {
             background-color: var(--tg-theme-bg-color, #17212b);
             border-radius: 16px;
-            height: 200px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -112,6 +119,40 @@
             font-size: 15px;
         }
 
+        /* === ЭКРАН ВСЕХ ОПЕРАЦИЙ === */
+        .all-history-screen {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--tg-theme-bg-color, #17212b); z-index: 1000;
+            flex-direction: column;
+        }
+        .all-history-screen.active { display: flex; }
+
+        .all-history-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #242f3d);
+            flex-shrink: 0;
+        }
+        .all-history-back {
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            border: none; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-right: 16px;
+        }
+        .all-history-back svg { width: 20px; height: 20px; stroke: var(--tg-theme-text-color, #fff); stroke-width: 2; fill: none; }
+        .all-history-title { font-size: 20px; font-weight: 700; }
+
+        .all-history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* === QR-ЭКРАН === */
         .qr-screen {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--tg-theme-bg-color, #1a1d29); z-index: 1000;
@@ -165,6 +206,7 @@
 </head>
 <body>
 
+    <!-- ===== ГЛАВНЫЙ ЭКРАН ===== -->
     <div id="mainScreen">
         <div class="profile-header">
             <button class="qr-btn" id="qrBtn" title="QR-сканер">
@@ -193,7 +235,7 @@
         <div class="history-section">
             <div class="history-header">
                 <div class="history-title">История операций</div>
-                <div class="history-all">Все</div>
+                <div class="history-all" id="historyAllBtn">Все</div>
             </div>
             <div id="historyContent">
                 <div class="history-empty">Нет операций</div>
@@ -201,6 +243,22 @@
         </div>
     </div>
 
+    <!-- ===== ЭКРАН ВСЕХ ОПЕРАЦИЙ ===== -->
+    <div class="all-history-screen" id="allHistoryScreen">
+        <div class="all-history-header">
+            <button class="all-history-back" id="allHistoryBack">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="all-history-title">История операций</div>
+        </div>
+        <div class="all-history-list" id="allHistoryList">
+            <div class="history-empty">Нет операций</div>
+        </div>
+    </div>
+
+    <!-- ===== QR-ЭКРАН ===== -->
     <div class="qr-screen" id="qrScreen">
         <button class="qr-close" id="qrClose">
             <svg viewBox="0 0 24 24">
@@ -347,7 +405,7 @@
             }
         }
 
-        // ==================== ХРАНИЛИЩЕ ПОЛЬЗОВАТЕЛЯ ====================
+        // ==================== ХРАНИЛИЩЕ ====================
 
         function getUserStorageKey(userId) {
             return `app_user_${userId}`;
@@ -388,29 +446,17 @@
             currentUserId = parseInt(localStorage.getItem('debug_user_id') || '0') || null;
         }
 
-        // Загружаем или создаём данные ТЕКУЩЕГО пользователя
         if (currentUserId) {
             userData = loadUserData(currentUserId);
             if (!userData) {
-                userData = { 
-                    balance: 0, 
-                    usedChecks: [],
-                    transactions: [] 
-                };
+                userData = { balance: 0, usedChecks: [], transactions: [] };
                 saveUserData(currentUserId, userData);
             }
-            if (!userData.transactions) {
-                userData.transactions = [];
-            }
+            if (!userData.transactions) userData.transactions = [];
         } else {
-            userData = { 
-                balance: 0, 
-                usedChecks: [],
-                transactions: [] 
-            };
+            userData = { balance: 0, usedChecks: [], transactions: [] };
         }
 
-        // Отображение профиля
         if (user) {
             const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
             document.getElementById('userName').textContent = fullName || 'Name';
@@ -442,7 +488,32 @@
             }) + ' ₽';
         }
 
-        function renderHistory() {
+        // Генерирует HTML одной операции
+        function createTransactionHTML(tx) {
+            const isIncome = tx.type === 'income';
+            const iconClass = isIncome ? 'income' : 'outcome';
+            const amountClass = isIncome ? 'income' : 'outcome';
+            const sign = isIncome ? '+' : '-';
+            const iconSvg = isIncome 
+                ? '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
+                : '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+            
+            return `
+                <div class="history-item">
+                    <div class="history-item-left">
+                        <div class="history-icon ${iconClass}">${iconSvg}</div>
+                        <div class="history-info">
+                            <div class="history-desc">${tx.description}</div>
+                            <div class="history-date">${formatDate(tx.date)}</div>
+                        </div>
+                    </div>
+                    <div class="history-amount ${amountClass}">${sign}${tx.amount.toFixed(2)} ₽</div>
+                </div>
+            `;
+        }
+
+        // Рендерит историю (limit = сколько показать, null = все)
+        function renderHistory(limit = null) {
             const container = document.getElementById('historyContent');
             
             if (!userData.transactions || userData.transactions.length === 0) {
@@ -454,37 +525,38 @@
                 new Date(b.date) - new Date(a.date)
             );
             
-            const recent = sorted.slice(0, 10);
+            const toShow = limit ? sorted.slice(0, limit) : sorted;
             
             let html = '<div class="history-list">';
-            for (const tx of recent) {
-                const isIncome = tx.type === 'income';
-                const iconClass = isIncome ? 'income' : 'outcome';
-                const amountClass = isIncome ? 'income' : 'outcome';
-                const sign = isIncome ? '+' : '-';
-                const iconSvg = isIncome 
-                    ? '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
-                    : '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
-                
-                html += `
-                    <div class="history-item">
-                        <div class="history-item-left">
-                            <div class="history-icon ${iconClass}">${iconSvg}</div>
-                            <div class="history-info">
-                                <div class="history-desc">${tx.description}</div>
-                                <div class="history-date">${formatDate(tx.date)}</div>
-                            </div>
-                        </div>
-                        <div class="history-amount ${amountClass}">${sign}${tx.amount.toFixed(2)} ₽</div>
-                    </div>
-                `;
+            for (const tx of toShow) {
+                html += createTransactionHTML(tx);
             }
             html += '</div>';
             container.innerHTML = html;
         }
 
+        // Рендерит полный экран истории
+        function renderAllHistory() {
+            const container = document.getElementById('allHistoryList');
+            
+            if (!userData.transactions || userData.transactions.length === 0) {
+                container.innerHTML = '<div class="history-empty">Нет операций</div>';
+                return;
+            }
+            
+            const sorted = [...userData.transactions].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            let html = '';
+            for (const tx of sorted) {
+                html += createTransactionHTML(tx);
+            }
+            container.innerHTML = html;
+        }
+
         updateBalanceDisplay();
-        renderHistory();
+        renderHistory(3); // Показываем только 3 последних
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -531,7 +603,7 @@
             saveUserData(currentUserId, userData);
             
             updateBalanceDisplay();
-            renderHistory();
+            renderHistory(3); // Обновляем главный экран (3 операции)
             showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
 
             if (window.history.replaceState) {
@@ -539,16 +611,11 @@
             }
         }
 
-        // ====== ИСПРАВЛЕНИЕ: защита от кэшированного start_param ======
-        // Проверяем, что initData НЕ пустой — значит приложение открыто через Telegram
-        // Если initData пустой, значит это просто обновление страницы, не новое открытие с чеком
+        // Обработка startapp
         const initData = tg.initData;
         const startParam = tg.initDataUnsafe?.start_param;
         
-        // Обрабатываем чек ТОЛЬКО если initData не пустой (гарантия свежего открытия)
-        // И startParam реально существует
         if (initData && startParam && startParam.trim() !== '') {
-            // Дополнительная проверка: не обрабатывали ли мы уже этот чек в этой сессии
             const lastProcessed = sessionStorage.getItem('last_processed_check');
             if (lastProcessed !== startParam) {
                 sessionStorage.setItem('last_processed_check', startParam);
@@ -556,8 +623,9 @@
             }
         }
 
-        // ==================== QR-СКАНЕР ====================
+        // ==================== НАВИГАЦИЯ ====================
 
+        // QR-сканер
         const qrScreen = document.getElementById('qrScreen');
         const qrBtn = document.getElementById('qrBtn');
         const qrClose = document.getElementById('qrClose');
@@ -583,6 +651,20 @@
             } else {
                 tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
+        });
+
+        // Экран всех операций
+        const allHistoryScreen = document.getElementById('allHistoryScreen');
+        const historyAllBtn = document.getElementById('historyAllBtn');
+        const allHistoryBack = document.getElementById('allHistoryBack');
+
+        historyAllBtn.addEventListener('click', () => {
+            renderAllHistory();
+            allHistoryScreen.classList.add('active');
+        });
+
+        allHistoryBack.addEventListener('click', () => {
+            allHistoryScreen.classList.remove('active');
         });
     </script>
 
