@@ -63,55 +63,76 @@
         .btn-primary { background-color: var(--tg-theme-button-color, #2b9ce1); color: var(--tg-theme-button-text-color, #ffffff); }
         .btn-secondary { background-color: var(--tg-theme-secondary-bg-color, #242f3d); color: var(--tg-theme-text-color, #ffffff); }
 
-        /* === ИСТОРИЯ НА ГЛАВНОМ ЭКРАНЕ (фиксированная, 3 операции) === */
+        /* === ИСТОРИЯ НА ГЛАВНОМ ЭКРАНЕ (фиксированный размер, 3 элемента) === */
         .history-section {
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
             border-radius: 24px;
             padding: 20px;
+            /* Фиксированная высота под 3 элемента + заголовок */
             min-height: 280px;
             max-height: 280px;
             display: flex;
             flex-direction: column;
         }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0; }
+        
+        .history-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
         .history-title { font-size: 17px; font-weight: 600; }
-        .history-all { font-size: 15px; color: var(--tg-theme-button-color, #2b9ce1); cursor: pointer; }
+        .history-all { 
+            font-size: 15px; 
+            color: var(--tg-theme-button-color, #2b9ce1); 
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
 
-        .history-list { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; }
+        .history-list { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px;
+            overflow: hidden;
+        }
         
         .history-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 10px 14px;
             background-color: var(--tg-theme-bg-color, #17212b);
             border-radius: 12px;
             flex-shrink: 0;
+            height: 60px;
         }
         
-        .history-item-left { display: flex; align-items: center; gap: 12px; }
+        .history-item-left { display: flex; align-items: center; gap: 10px; }
         .history-icon {
-            width: 40px; height: 40px; border-radius: 50%;
+            width: 36px; height: 36px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
         .history-icon.income { background-color: rgba(39, 174, 96, 0.2); }
-        .history-icon.income svg { fill: #27ae60; }
+        .history-icon.income svg { fill: #27ae60; width: 18px; height: 18px; }
         .history-icon.outcome { background-color: rgba(231, 76, 60, 0.2); }
-        .history-icon.outcome svg { fill: #e74c3c; }
+        .history-icon.outcome svg { fill: #e74c3c; width: 18px; height: 18px; }
         
         .history-info { display: flex; flex-direction: column; }
-        .history-desc { font-size: 15px; font-weight: 500; }
-        .history-date { font-size: 12px; color: var(--tg-theme-hint-color, #7d8b99); margin-top: 2px; }
+        .history-desc { font-size: 14px; font-weight: 500; }
+        .history-date { font-size: 11px; color: var(--tg-theme-hint-color, #7d8b99); margin-top: 1px; }
         
-        .history-amount { font-size: 16px; font-weight: 600; }
+        .history-amount { font-size: 15px; font-weight: 600; }
         .history-amount.income { color: #27ae60; }
         .history-amount.outcome { color: #e74c3c; }
 
         .history-empty {
             background-color: var(--tg-theme-bg-color, #17212b);
             border-radius: 16px;
-            height: 100%;
+            height: 180px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -121,8 +142,11 @@
 
         /* === ЭКРАН ВСЕХ ОПЕРАЦИЙ === */
         .all-history-screen {
-            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--tg-theme-bg-color, #17212b); z-index: 1000;
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--tg-theme-bg-color, #17212b);
+            z-index: 1000;
             flex-direction: column;
         }
         .all-history-screen.active { display: flex; }
@@ -131,28 +155,69 @@
             display: flex;
             align-items: center;
             padding: 16px 20px;
+            gap: 16px;
             border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #242f3d);
-            flex-shrink: 0;
         }
-        .all-history-back {
+        
+        .back-btn {
             width: 40px; height: 40px; border-radius: 50%;
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            border: none; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; margin-right: 16px;
+            border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
         }
-        .all-history-back svg { width: 20px; height: 20px; stroke: var(--tg-theme-text-color, #fff); stroke-width: 2; fill: none; }
+        .back-btn svg { width: 20px; height: 20px; stroke: var(--tg-theme-text-color, #fff); stroke-width: 2; fill: none; }
+        
         .all-history-title { font-size: 20px; font-weight: 700; }
 
         .all-history-list {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 20px;
+            padding: 12px 16px;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        /* === QR-ЭКРАН === */
+        .all-history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            border-radius: 14px;
+        }
+        
+        .all-history-item-left { display: flex; align-items: center; gap: 12px; }
+        .all-history-icon {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .all-history-icon.income { background-color: rgba(39, 174, 96, 0.2); }
+        .all-history-icon.income svg { fill: #27ae60; width: 22px; height: 22px; }
+        .all-history-icon.outcome { background-color: rgba(231, 76, 60, 0.2); }
+        .all-history-icon.outcome svg { fill: #e74c3c; width: 22px; height: 22px; }
+        
+        .all-history-info { display: flex; flex-direction: column; }
+        .all-history-desc { font-size: 15px; font-weight: 500; }
+        .all-history-date { font-size: 12px; color: var(--tg-theme-hint-color, #7d8b99); margin-top: 2px; }
+        
+        .all-history-amount { font-size: 16px; font-weight: 600; }
+        .all-history-amount.income { color: #27ae60; }
+        .all-history-amount.outcome { color: #e74c3c; }
+
+        .all-history-empty {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tg-theme-hint-color, #7d8b99);
+            font-size: 16px;
+        }
+
+        /* === QR ЭКРАН === */
         .qr-screen {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--tg-theme-bg-color, #1a1d29); z-index: 1000;
@@ -235,7 +300,7 @@
         <div class="history-section">
             <div class="history-header">
                 <div class="history-title">История операций</div>
-                <div class="history-all" id="historyAllBtn">Все</div>
+                <button class="history-all" id="showAllHistory">Все</button>
             </div>
             <div id="historyContent">
                 <div class="history-empty">Нет операций</div>
@@ -246,19 +311,17 @@
     <!-- ===== ЭКРАН ВСЕХ ОПЕРАЦИЙ ===== -->
     <div class="all-history-screen" id="allHistoryScreen">
         <div class="all-history-header">
-            <button class="all-history-back" id="allHistoryBack">
+            <button class="back-btn" id="backFromHistory">
                 <svg viewBox="0 0 24 24">
                     <path d="M15 18l-6-6 6-6"/>
                 </svg>
             </button>
             <div class="all-history-title">История операций</div>
         </div>
-        <div class="all-history-list" id="allHistoryList">
-            <div class="history-empty">Нет операций</div>
-        </div>
+        <div id="allHistoryContent" class="all-history-list"></div>
     </div>
 
-    <!-- ===== QR-ЭКРАН ===== -->
+    <!-- ===== QR ЭКРАН ===== -->
     <div class="qr-screen" id="qrScreen">
         <button class="qr-close" id="qrClose">
             <svg viewBox="0 0 24 24">
@@ -405,7 +468,7 @@
             }
         }
 
-        // ==================== ХРАНИЛИЩЕ ====================
+        // ==================== ХРАНИЛИЩЕ ПОЛЬЗОВАТЕЛЯ ====================
 
         function getUserStorageKey(userId) {
             return `app_user_${userId}`;
@@ -449,12 +512,22 @@
         if (currentUserId) {
             userData = loadUserData(currentUserId);
             if (!userData) {
-                userData = { balance: 0, usedChecks: [], transactions: [] };
+                userData = { 
+                    balance: 0, 
+                    usedChecks: [],
+                    transactions: [] 
+                };
                 saveUserData(currentUserId, userData);
             }
-            if (!userData.transactions) userData.transactions = [];
+            if (!userData.transactions) {
+                userData.transactions = [];
+            }
         } else {
-            userData = { balance: 0, usedChecks: [], transactions: [] };
+            userData = { 
+                balance: 0, 
+                usedChecks: [],
+                transactions: [] 
+            };
         }
 
         if (user) {
@@ -488,15 +561,15 @@
             }) + ' ₽';
         }
 
-        // Генерирует HTML одной операции
-        function createTransactionHTML(tx) {
+        // Рендер одного элемента истории (мини — для главного экрана)
+        function renderMiniHistoryItem(tx) {
             const isIncome = tx.type === 'income';
             const iconClass = isIncome ? 'income' : 'outcome';
             const amountClass = isIncome ? 'income' : 'outcome';
             const sign = isIncome ? '+' : '-';
             const iconSvg = isIncome 
-                ? '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
-                : '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+                ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
+                : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
             
             return `
                 <div class="history-item">
@@ -512,8 +585,32 @@
             `;
         }
 
-        // Рендерит историю (limit = сколько показать, null = все)
-        function renderHistory(limit = null) {
+        // Рендер одного элемента истории (полный — для экрана всех операций)
+        function renderFullHistoryItem(tx) {
+            const isIncome = tx.type === 'income';
+            const iconClass = isIncome ? 'income' : 'outcome';
+            const amountClass = isIncome ? 'income' : 'outcome';
+            const sign = isIncome ? '+' : '-';
+            const iconSvg = isIncome 
+                ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
+                : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+            
+            return `
+                <div class="all-history-item">
+                    <div class="all-history-item-left">
+                        <div class="all-history-icon ${iconClass}">${iconSvg}</div>
+                        <div class="all-history-info">
+                            <div class="all-history-desc">${tx.description}</div>
+                            <div class="all-history-date">${formatDate(tx.date)}</div>
+                        </div>
+                    </div>
+                    <div class="all-history-amount ${amountClass}">${sign}${tx.amount.toFixed(2)} ₽</div>
+                </div>
+            `;
+        }
+
+        // Рендер мини-истории (главный экран, макс 3)
+        function renderMiniHistory() {
             const container = document.getElementById('historyContent');
             
             if (!userData.transactions || userData.transactions.length === 0) {
@@ -525,22 +622,23 @@
                 new Date(b.date) - new Date(a.date)
             );
             
-            const toShow = limit ? sorted.slice(0, limit) : sorted;
+            // Только 3 последних
+            const recent = sorted.slice(0, 3);
             
             let html = '<div class="history-list">';
-            for (const tx of toShow) {
-                html += createTransactionHTML(tx);
+            for (const tx of recent) {
+                html += renderMiniHistoryItem(tx);
             }
             html += '</div>';
             container.innerHTML = html;
         }
 
-        // Рендерит полный экран истории
-        function renderAllHistory() {
-            const container = document.getElementById('allHistoryList');
+        // Рендер полной истории (экран "Все")
+        function renderFullHistory() {
+            const container = document.getElementById('allHistoryContent');
             
             if (!userData.transactions || userData.transactions.length === 0) {
-                container.innerHTML = '<div class="history-empty">Нет операций</div>';
+                container.innerHTML = '<div class="all-history-empty">Нет операций</div>';
                 return;
             }
             
@@ -550,13 +648,13 @@
             
             let html = '';
             for (const tx of sorted) {
-                html += createTransactionHTML(tx);
+                html += renderFullHistoryItem(tx);
             }
             container.innerHTML = html;
         }
 
         updateBalanceDisplay();
-        renderHistory(3); // Показываем только 3 последних
+        renderMiniHistory();
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -603,7 +701,7 @@
             saveUserData(currentUserId, userData);
             
             updateBalanceDisplay();
-            renderHistory(3); // Обновляем главный экран (3 операции)
+            renderMiniHistory();
             showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
 
             if (window.history.replaceState) {
@@ -625,7 +723,21 @@
 
         // ==================== НАВИГАЦИЯ ====================
 
-        // QR-сканер
+        const allHistoryScreen = document.getElementById('allHistoryScreen');
+        const showAllHistoryBtn = document.getElementById('showAllHistory');
+        const backFromHistoryBtn = document.getElementById('backFromHistory');
+
+        showAllHistoryBtn.addEventListener('click', () => {
+            renderFullHistory();
+            allHistoryScreen.classList.add('active');
+        });
+
+        backFromHistoryBtn.addEventListener('click', () => {
+            allHistoryScreen.classList.remove('active');
+        });
+
+        // ==================== QR-СКАНЕР ====================
+
         const qrScreen = document.getElementById('qrScreen');
         const qrBtn = document.getElementById('qrBtn');
         const qrClose = document.getElementById('qrClose');
@@ -651,20 +763,6 @@
             } else {
                 tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
-        });
-
-        // Экран всех операций
-        const allHistoryScreen = document.getElementById('allHistoryScreen');
-        const historyAllBtn = document.getElementById('historyAllBtn');
-        const allHistoryBack = document.getElementById('allHistoryBack');
-
-        historyAllBtn.addEventListener('click', () => {
-            renderAllHistory();
-            allHistoryScreen.classList.add('active');
-        });
-
-        allHistoryBack.addEventListener('click', () => {
-            allHistoryScreen.classList.remove('active');
         });
     </script>
 
