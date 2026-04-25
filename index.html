@@ -311,6 +311,39 @@
         .qr-scan-btn:active {
             opacity: 0.8;
         }
+
+        /* === УВЕДОМЛЕНИЯ === */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            color: var(--tg-theme-text-color, #ffffff);
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #2ea043;
+        }
+
+        .toast.error {
+            background-color: #da3633;
+        }
     </style>
 </head>
 <body>
@@ -415,18 +448,71 @@
         <button class="qr-scan-btn" id="startScan">Отсканировать QR-код</button>
     </div>
 
-    <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
+    <!-- Toast уведомление -->
+    <div class="toast" id="toast"></div>
 
+    <script>
+        // ==================== КРИПТОГРАФИЯ ====================
+        const SECRET_KEY = "key12415";
+
+        // XOR шифрование/дешифрование
+        function xorEncrypt(text, key) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        }
+
+        // Base64 URL-safe кодирование
+        function base64UrlEncode(str) {
+            return btoa(str)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        function base64UrlDecode(str) {
+            str += new Array(5 - str.length % 4).join('=');
+            return atob(str.replace(/\-/g, '+').replace(/\_/g, '/'));
+        }
+
+        // Шифрование данных чека
+        function encryptCheck(sum, userId) {
+            const data = `sum=${sum}&user_id=${userId}`;
+            const encrypted = xorEncrypt(data, SECRET_KEY);
+            return base64UrlEncode(encrypted);
+        }
+
+        // Дешифрование данных чека
+        function decryptCheck(encoded) {
+            try {
+                const encrypted = base64UrlDecode(encoded);
+                const decrypted = xorEncrypt(encrypted, SECRET_KEY);
+                
+                const params = new URLSearchParams(decrypted);
+                return {
+                    sum: parseFloat(params.get('sum')),
+                    user_id: params.get('user_id')
+                };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ==================== TELEGRAM WEBAPP ====================
+        const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         tg.setHeaderColor(tg.themeParams.bg_color || '#17212b');
 
-        // Заполнение профиля
+        // ==================== ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ====================
         const user = tg.initDataUnsafe?.user;
+        let currentUserId = null;
+        let balance = 0.00;
 
         if (user) {
+            currentUserId = String(user.id);
             const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
             document.getElementById('userName').textContent = fullName || 'Name';
             document.getElementById('userUsername').textContent = user.username ? '@' + user.username : '@username';
@@ -439,7 +525,55 @@
             }
         }
 
-        // Управление экранами
+        // ==================== БАЛАНС ====================
+        function updateBalanceDisplay() {
+            document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + ' ₽';
+        }
+
+        function addToBalance(amount) {
+            balance += amount;
+            updateBalanceDisplay();
+            showToast(`+${amount.toFixed(2)} ₽ зачислено на баланс!`, 'success');
+        }
+
+        // ==================== TOAST УВЕДОМЛЕНИЯ ====================
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ==================== ОБРАБОТКА ЧЕКА ИЗ URL ====================
+        function processUrlCheck() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Ищем любой параметр, который может быть зашифрованным чеком
+            for (const [key, value] of urlParams) {
+                const checkData = decryptCheck(key);
+                
+                if (checkData && checkData.sum && checkData.user_id) {
+                    if (!currentUserId) {
+                        showToast('Ошибка: не удалось получить ID пользователя', 'error');
+                        return;
+                    }
+                    
+                    if (checkData.user_id !== currentUserId) {
+                        showToast('❌ Этот чек предназначен для другого пользователя', 'error');
+                        return;
+                    }
+                    
+                    addToBalance(checkData.sum);
+                    
+                    // Убираем чек из URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    return;
+                }
+            }
+        }
+
+        // ==================== QR-СКАНЕР ====================
         const qrScreen = document.getElementById('qrScreen');
         const qrBtn = document.getElementById('qrBtn');
         const qrClose = document.getElementById('qrClose');
@@ -458,14 +592,31 @@
                 tg.showScanQrPopup({
                     text: 'Наведите камеру на QR-код оплаты'
                 }, (text) => {
+                    // Пытаемся расшифровать отсканированный текст как чек
+                    const checkData = decryptCheck(text);
+                    
+                    if (checkData && checkData.sum && checkData.user_id) {
+                        if (checkData.user_id !== currentUserId) {
+                            tg.showAlert('❌ Этот чек предназначен для другого пользователя');
+                            return true;
+                        }
+                        
+                        addToBalance(checkData.sum);
+                        qrScreen.classList.remove('active');
+                        return true;
+                    }
+                    
                     tg.showAlert('Отсканировано: ' + text);
-                    qrScreen.classList.remove('active');
                     return true;
                 });
             } else {
                 tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
         });
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        updateBalanceDisplay();
+        processUrlCheck();
     </script>
 
 </body>
