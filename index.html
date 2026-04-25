@@ -6,11 +6,7 @@
     <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -41,16 +37,8 @@
             flex-shrink: 0;
             transition: opacity 0.2s;
         }
-
-        .qr-btn:active {
-            opacity: 0.7;
-        }
-
-        .qr-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--tg-theme-text-color, #ffffff);
-        }
+        .qr-btn:active { opacity: 0.7; }
+        .qr-btn svg { width: 24px; height: 24px; fill: var(--tg-theme-text-color, #ffffff); }
 
         .profile-info {
             display: flex;
@@ -63,287 +51,90 @@
         }
 
         .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 40px; height: 40px; border-radius: 50%;
             background-color: var(--tg-theme-button-color, #2b9ce1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 600;
-            color: #ffffff;
-            flex-shrink: 0;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 600; color: #fff;
+            flex-shrink: 0; overflow: hidden;
         }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .user-details { display: flex; flex-direction: column; overflow: hidden; }
+        .user-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-username { font-size: 13px; color: var(--tg-theme-hint-color, #7d8b99); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .user-name {
-            font-size: 15px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .user-username {
-            font-size: 13px;
-            color: var(--tg-theme-hint-color, #7d8b99);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .balance-section {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .balance {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
+        .balance-section { text-align: center; margin-bottom: 24px; }
+        .balance { font-size: 42px; font-weight: 700; margin-bottom: 16px; }
+        .actions { display: flex; gap: 12px; justify-content: center; }
 
         .btn {
-            padding: 12px 24px;
-            border-radius: 24px;
-            border: none;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
+            padding: 12px 24px; border-radius: 24px; border: none;
+            font-size: 15px; font-weight: 500; cursor: pointer;
             transition: opacity 0.2s;
         }
-
-        .btn:active {
-            opacity: 0.8;
-        }
-
-        .btn-primary {
-            background-color: var(--tg-theme-button-color, #2b9ce1);
-            color: var(--tg-theme-button-text-color, #ffffff);
-        }
-
-        .btn-secondary {
-            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            color: var(--tg-theme-text-color, #ffffff);
-        }
+        .btn:active { opacity: 0.8; }
+        .btn-primary { background-color: var(--tg-theme-button-color, #2b9ce1); color: var(--tg-theme-button-text-color, #ffffff); }
+        .btn-secondary { background-color: var(--tg-theme-secondary-bg-color, #242f3d); color: var(--tg-theme-text-color, #ffffff); }
 
         .history-section {
             background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 24px; padding: 20px;
         }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .history-title {
-            font-size: 17px;
-            font-weight: 600;
-        }
-
-        .history-all {
-            font-size: 15px;
-            color: var(--tg-theme-button-color, #2b9ce1);
-            cursor: pointer;
-        }
-
-        .history-empty {
-            background-color: var(--tg-theme-bg-color, #17212b);
-            border-radius: 16px;
-            height: 200px;
-        }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .history-title { font-size: 17px; font-weight: 600; }
+        .history-all { font-size: 15px; color: var(--tg-theme-button-color, #2b9ce1); cursor: pointer; }
+        .history-empty { background-color: var(--tg-theme-bg-color, #17212b); border-radius: 16px; height: 200px; }
 
         /* === ЭКРАН QR-ИНСТРУКЦИИ === */
         .qr-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--tg-theme-bg-color, #1a1d29);
-            z-index: 1000;
-            flex-direction: column;
-            padding: 20px;
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--tg-theme-bg-color, #1a1d29); z-index: 1000;
+            flex-direction: column; padding: 20px;
         }
-
-        .qr-screen.active {
-            display: flex;
-        }
+        .qr-screen.active { display: flex; }
 
         .qr-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            position: absolute; top: 16px; right: 16px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1); border: none;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
+        .qr-close svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2; fill: none; }
 
-        .qr-close svg {
-            width: 20px;
-            height: 20px;
-            stroke: #ffffff;
-            stroke-width: 2;
-            fill: none;
-        }
+        .qr-logo { width: 97px; height: 120px; margin: 60px auto 24px; display: flex; align-items: center; justify-content: center; }
+        .qr-logo svg { width: 100%; height: 100%; }
 
-        .qr-logo {
-            width: 97px;
-            height: 120px;
-            margin: 60px auto 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .qr-title { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 12px; }
+        .qr-subtitle { font-size: 16px; text-align: center; color: var(--tg-theme-hint-color, #8e8e93); margin-bottom: 40px; line-height: 1.5; }
+        .qr-steps-title { font-size: 14px; color: var(--tg-theme-hint-color, #8e8e93); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 24px; }
 
-        .qr-logo svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .qr-title {
-            font-size: 28px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .qr-subtitle {
-            font-size: 16px;
-            text-align: center;
-            color: var(--tg-theme-hint-color, #8e8e93);
-            margin-bottom: 40px;
-            line-height: 1.5;
-        }
-
-        .qr-steps-title {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #8e8e93);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 24px;
-        }
-
-        .qr-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .qr-step-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: var(--tg-theme-button-color, #2b9ce1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .qr-step-icon svg {
-            width: 24px;
-            height: 24px;
-            fill: #ffffff;
-        }
-
-        .qr-step-content {
-            flex: 1;
-        }
-
-        .qr-step-title {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .qr-step-desc {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #8e8e93);
-            line-height: 1.4;
-        }
+        .qr-step { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+        .qr-step-icon { width: 48px; height: 48px; border-radius: 50%; background-color: var(--tg-theme-button-color, #2b9ce1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .qr-step-icon svg { width: 24px; height: 24px; fill: #fff; }
+        .qr-step-content { flex: 1; }
+        .qr-step-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+        .qr-step-desc { font-size: 14px; color: var(--tg-theme-hint-color, #8e8e93); line-height: 1.4; }
 
         .qr-scan-btn {
-            margin-top: auto;
-            margin-bottom: 20px;
-            padding: 16px;
-            border-radius: 16px;
-            border: none;
+            margin-top: auto; margin-bottom: 20px; padding: 16px;
+            border-radius: 16px; border: none;
             background-color: var(--tg-theme-button-color, #2b9ce1);
             color: var(--tg-theme-button-text-color, #ffffff);
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            font-size: 17px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
         }
-
-        .qr-scan-btn:active {
-            opacity: 0.8;
-        }
+        .qr-scan-btn:active { opacity: 0.8; }
 
         /* === УВЕДОМЛЕНИЯ === */
         .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
-            color: var(--tg-theme-text-color, #ffffff);
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 500;
-            z-index: 2000;
-            opacity: 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            max-width: 90%;
-            text-align: center;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background-color: var(--tg-theme-button-color, #2b9ce1);
+            color: #fff; padding: 12px 24px; border-radius: 12px;
+            font-size: 15px; font-weight: 500; z-index: 2000;
+            opacity: 0; transition: all 0.3s ease;
         }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background-color: #2ea043;
-        }
-
-        .toast.error {
-            background-color: #da3633;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.error { background-color: #e74c3c; }
+        .toast.success { background-color: #27ae60; }
     </style>
 </head>
 <body>
@@ -452,67 +243,82 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // ==================== КРИПТОГРАФИЯ ====================
+        // ==================== КРИПТОГРАФИЯ НА ФРОНТЕНДЕ ====================
+        
         const SECRET_KEY = "key12415";
 
-        // XOR шифрование/дешифрование
-        function xorEncrypt(text, key) {
-            let result = '';
-            for (let i = 0; i < text.length; i++) {
-                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-            }
-            return result;
+        // SHA-256 хеширование
+        async function sha256(message) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return new Uint8Array(hashBuffer);
         }
 
-        // Base64 URL-safe кодирование
-        function base64UrlEncode(str) {
-            return btoa(str)
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
+        // Base64 URL-safe encode/decode
+        function base64UrlEncode(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         }
 
         function base64UrlDecode(str) {
             str += new Array(5 - str.length % 4).join('=');
-            return atob(str.replace(/\-/g, '+').replace(/\_/g, '/'));
+            str = str.replace(/\-/g, '+').replace(/\_/g, '/');
+            const binary = atob(str);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
         }
 
-        // Шифрование данных чека
-        function encryptCheck(sum, userId) {
-            const data = `sum=${sum}&user_id=${userId}`;
-            const encrypted = xorEncrypt(data, SECRET_KEY);
+        // XOR шифрование с ключом, производным из SECRET_KEY
+        async function encryptData(data) {
+            const key = await sha256(SECRET_KEY);
+            const dataBytes = new TextEncoder().encode(data);
+            const encrypted = new Uint8Array(dataBytes.length);
+            
+            for (let i = 0; i < dataBytes.length; i++) {
+                encrypted[i] = dataBytes[i] ^ key[i % key.length];
+            }
+            
             return base64UrlEncode(encrypted);
         }
 
-        // Дешифрование данных чека
-        function decryptCheck(encoded) {
+        async function decryptData(token) {
             try {
-                const encrypted = base64UrlDecode(encoded);
-                const decrypted = xorEncrypt(encrypted, SECRET_KEY);
+                const key = await sha256(SECRET_KEY);
+                const encrypted = base64UrlDecode(token);
+                const decrypted = new Uint8Array(encrypted.length);
                 
-                const params = new URLSearchParams(decrypted);
-                return {
-                    sum: parseFloat(params.get('sum')),
-                    user_id: params.get('user_id')
-                };
+                for (let i = 0; i < encrypted.length; i++) {
+                    decrypted[i] = encrypted[i] ^ key[i % key.length];
+                }
+                
+                return new TextDecoder().decode(decrypted);
             } catch (e) {
                 return null;
             }
         }
 
-        // ==================== TELEGRAM WEBAPP ====================
+        // ==================== ПРИЛОЖЕНИЕ ====================
+
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         tg.setHeaderColor(tg.themeParams.bg_color || '#17212b');
 
-        // ==================== ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ====================
+        // Данные пользователя
         const user = tg.initDataUnsafe?.user;
         let currentUserId = null;
-        let balance = 0.00;
+        let balance = parseFloat(localStorage.getItem('balance') || '0');
 
         if (user) {
-            currentUserId = String(user.id);
+            currentUserId = user.id;
             const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
             document.getElementById('userName').textContent = fullName || 'Name';
             document.getElementById('userUsername').textContent = user.username ? '@' + user.username : '@username';
@@ -525,19 +331,17 @@
             }
         }
 
-        // ==================== БАЛАНС ====================
+        // Обновление баланса
         function updateBalanceDisplay() {
-            document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + ' ₽';
+            document.getElementById('balance').textContent = balance.toLocaleString('ru-RU', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' ₽';
         }
+        updateBalanceDisplay();
 
-        function addToBalance(amount) {
-            balance += amount;
-            updateBalanceDisplay();
-            showToast(`+${amount.toFixed(2)} ₽ зачислено на баланс!`, 'success');
-        }
-
-        // ==================== TOAST УВЕДОМЛЕНИЯ ====================
-        function showToast(message, type = '') {
+        // Toast уведомление
+        function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast ' + type;
@@ -545,35 +349,52 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ==================== ОБРАБОТКА ЧЕКА ИЗ URL ====================
-        function processUrlCheck() {
-            const urlParams = new URLSearchParams(window.location.search);
+        // Обработка чека из startapp
+        async function processCheck(token) {
+            if (!token) return;
             
-            // Ищем любой параметр, который может быть зашифрованным чеком
-            for (const [key, value] of urlParams) {
-                const checkData = decryptCheck(key);
-                
-                if (checkData && checkData.sum && checkData.user_id) {
-                    if (!currentUserId) {
-                        showToast('Ошибка: не удалось получить ID пользователя', 'error');
-                        return;
-                    }
-                    
-                    if (checkData.user_id !== currentUserId) {
-                        showToast('❌ Этот чек предназначен для другого пользователя', 'error');
-                        return;
-                    }
-                    
-                    addToBalance(checkData.sum);
-                    
-                    // Убираем чек из URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    return;
-                }
+            const decrypted = await decryptData(token);
+            if (!decrypted) {
+                showToast('Неверный или повреждённый чек', 'error');
+                return;
+            }
+
+            // Парсим параметры
+            const params = new URLSearchParams(decrypted);
+            const sum = parseFloat(params.get('sum'));
+            const checkUserId = parseInt(params.get('user_id'));
+
+            if (isNaN(sum) || isNaN(checkUserId)) {
+                showToast('Неверный формат чека', 'error');
+                return;
+            }
+
+            // Проверяем user_id
+            if (currentUserId && checkUserId !== currentUserId) {
+                showToast('Этот чек предназначен для другого пользователя', 'error');
+                return;
+            }
+
+            // Зачисляем
+            balance += sum;
+            localStorage.setItem('balance', balance.toString());
+            updateBalanceDisplay();
+            showToast(`+${sum.toFixed(2)} ₽ зачислено!`, 'success');
+
+            // Очищаем startapp из URL (чтобы не повторить при обновлении)
+            if (window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
+        // Получаем startapp параметр из initDataUnsafe
+        const startParam = tg.initDataUnsafe?.start_param;
+        if (startParam) {
+            processCheck(startParam);
+        }
+
         // ==================== QR-СКАНЕР ====================
+
         const qrScreen = document.getElementById('qrScreen');
         const qrBtn = document.getElementById('qrBtn');
         const qrClose = document.getElementById('qrClose');
@@ -591,32 +412,16 @@
             if (tg.showScanQrPopup) {
                 tg.showScanQrPopup({
                     text: 'Наведите камеру на QR-код оплаты'
-                }, (text) => {
-                    // Пытаемся расшифровать отсканированный текст как чек
-                    const checkData = decryptCheck(text);
-                    
-                    if (checkData && checkData.sum && checkData.user_id) {
-                        if (checkData.user_id !== currentUserId) {
-                            tg.showAlert('❌ Этот чек предназначен для другого пользователя');
-                            return true;
-                        }
-                        
-                        addToBalance(checkData.sum);
-                        qrScreen.classList.remove('active');
-                        return true;
-                    }
-                    
-                    tg.showAlert('Отсканировано: ' + text);
+                }, async (text) => {
+                    // text — это зашифрованный токен из QR
+                    await processCheck(text);
+                    qrScreen.classList.remove('active');
                     return true;
                 });
             } else {
                 tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
         });
-
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-        updateBalanceDisplay();
-        processUrlCheck();
     </script>
 
 </body>
