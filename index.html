@@ -70,7 +70,47 @@
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .history-title { font-size: 17px; font-weight: 600; }
         .history-all { font-size: 15px; color: var(--tg-theme-button-color, #2b9ce1); cursor: pointer; }
-        .history-empty { background-color: var(--tg-theme-bg-color, #17212b); border-radius: 16px; height: 200px; }
+
+        .history-list { display: flex; flex-direction: column; gap: 8px; }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background-color: var(--tg-theme-bg-color, #17212b);
+            border-radius: 12px;
+        }
+        
+        .history-item-left { display: flex; align-items: center; gap: 12px; }
+        .history-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .history-icon.income { background-color: rgba(39, 174, 96, 0.2); }
+        .history-icon.income svg { fill: #27ae60; }
+        .history-icon.outcome { background-color: rgba(231, 76, 60, 0.2); }
+        .history-icon.outcome svg { fill: #e74c3c; }
+        
+        .history-info { display: flex; flex-direction: column; }
+        .history-desc { font-size: 15px; font-weight: 500; }
+        .history-date { font-size: 12px; color: var(--tg-theme-hint-color, #7d8b99); margin-top: 2px; }
+        
+        .history-amount { font-size: 16px; font-weight: 600; }
+        .history-amount.income { color: #27ae60; }
+        .history-amount.outcome { color: #e74c3c; }
+
+        .history-empty {
+            background-color: var(--tg-theme-bg-color, #17212b);
+            border-radius: 16px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tg-theme-hint-color, #7d8b99);
+            font-size: 15px;
+        }
 
         .qr-screen {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -155,7 +195,9 @@
                 <div class="history-title">История операций</div>
                 <div class="history-all">Все</div>
             </div>
-            <div class="history-empty"></div>
+            <div id="historyContent">
+                <div class="history-empty">Нет операций</div>
+            </div>
         </div>
     </div>
 
@@ -227,7 +269,7 @@
 
     <script>
         // ==================== КРИПТОГРАФИЯ ====================
-
+        
         const SECRET_KEY = "key12415";
 
         async function sha256(message) {
@@ -248,9 +290,6 @@
             }
             return bytes;
         }
-
-        // ======== ИСПРАВЛЕННЫЕ ФУНКЦИИ ЧТЕНИЯ ========
-        // Ключевое исправление: используем DataView напрямую на копии байтов
 
         function readFloat32(bytes, offset) {
             const buf = new ArrayBuffer(4);
@@ -277,27 +316,26 @@
             try {
                 const key = await sha256(SECRET_KEY);
                 const encrypted = base64UrlDecode(token);
-
+                
                 if (encrypted.length !== 16) {
                     console.error("Wrong length:", encrypted.length, "expected 16");
                     return null;
                 }
-
+                
                 const decrypted = new Uint8Array(16);
                 for (let i = 0; i < 16; i++) {
                     decrypted[i] = encrypted[i] ^ key[i % key.length];
                 }
-
+                
                 const sum = readFloat32(decrypted, 0);
                 const user_id = Number(readUint64(decrypted, 4));
                 const check_id = readUint32(decrypted, 12);
-
-                // Валидация: float должен быть разумным
+                
                 if (isNaN(sum) || sum < 0 || sum > 1000000) {
                     console.error("Invalid sum:", sum);
                     return null;
                 }
-
+                
                 return {
                     sum: Math.round(sum * 100) / 100,
                     user_id: user_id,
@@ -333,17 +371,6 @@
             localStorage.setItem(key, JSON.stringify(data));
         }
 
-        function clearOtherUsersData(currentUserId) {
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('app_user_') && key !== getUserStorageKey(currentUserId)) {
-                    keysToRemove.push(key);
-                }
-            }
-            keysToRemove.forEach(k => localStorage.removeItem(k));
-        }
-
         // ==================== ПРИЛОЖЕНИЕ ====================
 
         const tg = window.Telegram.WebApp;
@@ -361,16 +388,31 @@
             currentUserId = parseInt(localStorage.getItem('debug_user_id') || '0') || null;
         }
 
+        // Загружаем или создаём данные ТЕКУЩЕГО пользователя
+        // Данные других пользователей НЕ трогаем!
         if (currentUserId) {
             userData = loadUserData(currentUserId);
             if (!userData) {
-                userData = { balance: 0, usedChecks: [] };
+                userData = { 
+                    balance: 0, 
+                    usedChecks: [],
+                    transactions: [] 
+                };
+                saveUserData(currentUserId, userData);
             }
-            clearOtherUsersData(currentUserId);
+            // Гарантируем наличие transactions для старых данных
+            if (!userData.transactions) {
+                userData.transactions = [];
+            }
         } else {
-            userData = { balance: 0, usedChecks: [] };
+            userData = { 
+                balance: 0, 
+                usedChecks: [],
+                transactions: [] 
+            };
         }
 
+        // Отображение профиля
         if (user) {
             const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
             document.getElementById('userName').textContent = fullName || 'Name';
@@ -384,13 +426,69 @@
             }
         }
 
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            const now = new Date();
+            const isToday = d.toDateString() === now.toDateString();
+            
+            if (isToday) {
+                return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            }
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
         function updateBalanceDisplay() {
             document.getElementById('balance').textContent = userData.balance.toLocaleString('ru-RU', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }) + ' ₽';
         }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContent');
+            
+            if (!userData.transactions || userData.transactions.length === 0) {
+                container.innerHTML = '<div class="history-empty">Нет операций</div>';
+                return;
+            }
+            
+            // Сортируем по дате (новые сверху)
+            const sorted = [...userData.transactions].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            // Берём последние 10
+            const recent = sorted.slice(0, 10);
+            
+            let html = '<div class="history-list">';
+            for (const tx of recent) {
+                const isIncome = tx.type === 'income';
+                const iconClass = isIncome ? 'income' : 'outcome';
+                const amountClass = isIncome ? 'income' : 'outcome';
+                const sign = isIncome ? '+' : '-';
+                const iconSvg = isIncome 
+                    ? '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
+                    : '<svg width="20" height="20" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+                
+                html += `
+                    <div class="history-item">
+                        <div class="history-item-left">
+                            <div class="history-icon ${iconClass}">${iconSvg}</div>
+                            <div class="history-info">
+                                <div class="history-desc">${tx.description}</div>
+                                <div class="history-date">${formatDate(tx.date)}</div>
+                            </div>
+                        </div>
+                        <div class="history-amount ${amountClass}">${sign}${tx.amount.toFixed(2)} ₽</div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
         updateBalanceDisplay();
+        renderHistory();
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -402,12 +500,12 @@
 
         async function processCheck(token) {
             if (!token) return;
-
+            
             if (!currentUserId) {
                 showToast('Ошибка: не удалось определить пользователя', 'error');
                 return;
             }
-
+            
             const data = await decryptCheck(token);
             if (!data) {
                 showToast('Неверный или повреждённый чек', 'error');
@@ -424,11 +522,22 @@
                 return;
             }
 
+            // Зачисляем
             userData.balance += data.sum;
             userData.usedChecks.push(data.check_id);
+            
+            // Добавляем в историю
+            userData.transactions.push({
+                date: new Date().toISOString(),
+                type: 'income',
+                amount: data.sum,
+                description: 'Активация чека'
+            });
+            
             saveUserData(currentUserId, userData);
-
+            
             updateBalanceDisplay();
+            renderHistory();
             showToast(`+${data.sum.toFixed(2)} ₽ зачислено!`, 'success');
 
             if (window.history.replaceState) {
