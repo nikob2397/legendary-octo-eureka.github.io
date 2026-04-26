@@ -357,6 +357,7 @@
         function pushScreen(screenElement, onBack) {
             screenStack.push({ element: screenElement, onBack: onBack });
             updateBackButton();
+            tg.setHeaderColor("#17212b");
         }
 
         function popScreen() {
