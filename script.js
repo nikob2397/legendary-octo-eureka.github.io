@@ -397,3 +397,116 @@
                 tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
         });
+
+// ==================== ЭКРАН ПЕРЕВОДОВ ====================
+
+const transferScreen = document.getElementById('transferScreen');
+const transferBtn = document.getElementById('transferBtn');
+const backFromTransfer = document.getElementById('backFromTransfer');
+
+if (transferBtn) {
+    transferBtn.addEventListener('click', () => {
+        transferScreen.classList.add('active');
+    });
+}
+
+if (backFromTransfer) {
+    backFromTransfer.addEventListener('click', () => {
+        transferScreen.classList.remove('active');
+    });
+}
+
+// ==================== ЭКРАН НАСТРОЙКИ АККАУНТА ====================
+
+const setupScreen = document.getElementById('setupScreen');
+const setupPhoneStep = document.getElementById('setupPhoneStep');
+const backFromSetup = document.getElementById('backFromSetup');
+
+// Open setup screen when any transfer item is clicked
+document.querySelectorAll('.transfer-item').forEach(item => {
+    item.addEventListener('click', () => {
+        transferScreen.classList.remove('active');
+        setupScreen.classList.add('active');
+    });
+});
+
+if (backFromSetup) {
+    backFromSetup.addEventListener('click', () => {
+        setupScreen.classList.remove('active');
+    });
+}
+
+// ==================== МОДАЛЬНОЕ ОКНО ТЕЛЕФОНА ====================
+
+const phoneModal = document.getElementById('phoneModal');
+const phoneModalOverlay = document.getElementById('phoneModalOverlay');
+const phoneModalClose = document.getElementById('phoneModalClose');
+const phoneModalContinue = document.getElementById('phoneModalContinue');
+
+function openPhoneModal() {
+    phoneModal.classList.add('active');
+}
+
+function closePhoneModal() {
+    phoneModal.classList.remove('active');
+}
+
+if (setupPhoneStep) {
+    setupPhoneStep.addEventListener('click', openPhoneModal);
+}
+
+if (phoneModalOverlay) {
+    phoneModalOverlay.addEventListener('click', closePhoneModal);
+}
+
+if (phoneModalClose) {
+    phoneModalClose.addEventListener('click', closePhoneModal);
+}
+
+if (phoneModalContinue) {
+    phoneModalContinue.addEventListener('click', () => {
+        if (tg.requestContact) {
+            tg.requestContact((sent, event) => {
+                if (sent) {
+                    const phone = event?.responseUnsafe?.contact?.phone_number;
+                    if (phone) {
+                        userData.phone = phone;
+                        if (currentUserId) {
+                            saveUserData(currentUserId, userData);
+                        }
+                        showToast('Номер телефона сохранён!', 'success');
+                        closePhoneModal();
+                        // Mark step as done
+                        setupPhoneStep.classList.remove('active');
+                        setupPhoneStep.classList.add('done');
+                        const icon = setupPhoneStep.querySelector('.setup-step-icon');
+                        icon.classList.remove('blue');
+                        icon.classList.add('green');
+                        icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+                        setupPhoneStep.querySelector('.setup-step-arrow').outerHTML = '<div class="setup-step-check"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>';
+                        // Update progress
+                        document.querySelector('.progress-bar').style.strokeDashoffset = '0';
+                        document.querySelector('.setup-percent').textContent = '100%';
+                        document.querySelector('.setup-subtitle').textContent = 'Всё готово!';
+                    }
+                } else {
+                    showToast('Доступ к контактам отклонён', 'error');
+                }
+            });
+        } else {
+            showToast('requestContact недоступен', 'error');
+        }
+    });
+}
+
+// Update setup avatar with user data
+if (user) {
+    const setupAvatar = document.getElementById('setupAvatar');
+    if (setupAvatar) {
+        if (user.photo_url) {
+            setupAvatar.innerHTML = `<img src="${user.photo_url}" alt="avatar">`;
+        } else {
+            setupAvatar.textContent = (user.first_name?.[0] || 'N').toUpperCase();
+        }
+    }
+}

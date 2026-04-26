@@ -30,7 +30,7 @@
             <div class="balance" id="balance">0,00 ₽</div>
             <div class="actions">
                 <button class="btn btn-primary">+ Пополнить</button>
-                <button class="btn btn-secondary">Перевести</button>
+                <button class="btn btn-secondary" id="transferBtn">Перевести</button>
             </div>
         </div>
 
@@ -104,6 +104,51 @@
         </div>
     </div>
 
+
+    <!-- ===== ЭКРАН ПЕРЕВОДОВ ===== -->
+    <div class="transfer-screen" id="transferScreen">
+        <div class="transfer-header">
+            <button class="back-btn" id="backFromTransfer">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="transfer-header-title">Переводы</div>
+            <div style="width:48px;"></div>
+        </div>
+        <div class="transfer-content">
+            <div class="transfer-logo">
+                <img src="https://emoji-cdn.mqrio.dev/💸?style=telegram" alt="💸">
+            </div>
+            <div class="transfer-title">Переводы</div>
+            <div class="transfer-card">
+                <div class="transfer-item" data-action="wallet">
+                    <div class="transfer-item-icon blue">
+                        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </div>
+                    <div class="transfer-item-text">В кошелёк</div>
+                </div>
+                <div class="transfer-item" data-action="card">
+                    <div class="transfer-item-icon blue">
+                        <svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                    </div>
+                    <div class="transfer-item-text">Из кошелька на карту</div>
+                </div>
+                <div class="transfer-item" data-action="phone">
+                    <div class="transfer-item-icon blue">
+                        <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+                    </div>
+                    <div class="transfer-item-text">По номеру телефона</div>
+                </div>
+                <div class="transfer-item" data-action="check">
+                    <div class="transfer-item-icon teal">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    </div>
+                    <div class="transfer-item-text">Создать чек</div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- ===== ЭКРАН ВСЕХ ОПЕРАЦИЙ ===== -->
     <div class="all-history-screen" id="allHistoryScreen">
         <div class="all-history-header">
@@ -118,6 +163,73 @@
     </div>
 
     <!-- ===== QR ЭКРАН ===== -->
+    <!-- ===== ЭКРАН НАСТРОЙКИ АККАУНТА ===== -->
+    <div class="setup-screen" id="setupScreen">
+        <div class="setup-header">
+            <button class="back-btn" id="backFromSetup">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="setup-header-title">Настройка аккаунта</div>
+            <div style="width:48px;"></div>
+        </div>
+        <div class="setup-content">
+            <div class="setup-avatar-wrap">
+                <div class="setup-avatar-progress">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="progress-bg" cx="60" cy="60" r="54"/>
+                        <circle class="progress-bar" cx="60" cy="60" r="54" stroke-dasharray="339.292" stroke-dashoffset="169.646"/>
+                    </svg>
+                    <div class="setup-avatar" id="setupAvatar">N</div>
+                    <div class="setup-percent">50%</div>
+                </div>
+            </div>
+            <div class="setup-title">Настройте свой аккаунт</div>
+            <div class="setup-subtitle">Остался 1 шаг</div>
+            <div class="setup-section-title">Настройка кошелька</div>
+            <div class="setup-steps">
+                <div class="setup-step done">
+                    <div class="setup-step-icon green">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                    <div class="setup-step-text">Создайте кошелёк</div>
+                    <div class="setup-step-check">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                </div>
+                <div class="setup-step-line"></div>
+                <div class="setup-step active" id="setupPhoneStep">
+                    <div class="setup-step-icon blue">
+                        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    </div>
+                    <div class="setup-step-text">Укажите номер телефона</div>
+                    <div class="setup-step-arrow">
+                        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО ТЕЛЕФОНА ===== -->
+    <div class="phone-modal" id="phoneModal">
+        <div class="phone-modal-overlay" id="phoneModalOverlay"></div>
+        <div class="phone-modal-sheet">
+            <button class="phone-modal-close" id="phoneModalClose">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <div class="phone-modal-icon">
+                <img src="https://emoji-cdn.mqrio.dev/📱?style=telegram" alt="📱">
+            </div>
+            <div class="phone-modal-title">Укажите номер телефона</div>
+            <div class="phone-modal-desc">Поделитесь своим номером телефона в Telegram.</div>
+            <button class="phone-modal-btn" id="phoneModalContinue">Продолжить</button>
+        </div>
+    </div>
+
     <div class="qr-screen" id="qrScreen">
         <button class="qr-close" id="qrClose">
             <svg viewBox="0 0 24 24">
