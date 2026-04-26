@@ -354,19 +354,52 @@
             qrScreen.classList.add('active');
         });
 
+        // ==================== TELEGRAM BACK BUTTON ====================
+        // Управление стеком экранов для навигации назад
+        const screenStack = [];
+        let backButtonHandler = null;
+
+        function pushScreen(screenElement, onBack) {
+            screenStack.push({ element: screenElement, onBack: onBack });
+            updateBackButton();
+        }
+
+        function popScreen() {
+            if (screenStack.length === 0) return;
+            const screen = screenStack.pop();
+            screen.element.classList.remove('active');
+            if (screen.onBack) screen.onBack();
+            updateBackButton();
+        }
+
+        function updateBackButton() {
+            if (screenStack.length > 0) {
+                tg.BackButton.show();
+                if (backButtonHandler) {
+                    tg.BackButton.offClick(backButtonHandler);
+                }
+                backButtonHandler = () => {
+                    popScreen();
+                };
+                tg.BackButton.onClick(backButtonHandler);
+            } else {
+                if (backButtonHandler) {
+                    tg.BackButton.offClick(backButtonHandler);
+                    backButtonHandler = null;
+                }
+                tg.BackButton.hide();
+            }
+        }
+
         // ==================== НАВИГАЦИЯ ====================
 
         const allHistoryScreen = document.getElementById('allHistoryScreen');
         const showAllHistoryBtn = document.getElementById('showAllHistory');
-        const backFromHistoryBtn = document.getElementById('backFromHistory');
 
         showAllHistoryBtn.addEventListener('click', () => {
             renderFullHistory();
             allHistoryScreen.classList.add('active');
-        });
-
-        backFromHistoryBtn.addEventListener('click', () => {
-            allHistoryScreen.classList.remove('active');
+            pushScreen(allHistoryScreen);
         });
 
         // ==================== QR-СКАНЕР ====================
@@ -378,10 +411,11 @@
 
         qrBtn.addEventListener('click', () => {
             qrScreen.classList.add('active');
+            pushScreen(qrScreen);
         });
 
         qrClose.addEventListener('click', () => {
-            qrScreen.classList.remove('active');
+            popScreen();
         });
 
         startScan.addEventListener('click', () => {
@@ -402,17 +436,11 @@
 
 const transferScreen = document.getElementById('transferScreen');
 const transferBtn = document.getElementById('transferBtn');
-const backFromTransfer = document.getElementById('backFromTransfer');
 
 if (transferBtn) {
     transferBtn.addEventListener('click', () => {
         transferScreen.classList.add('active');
-    });
-}
-
-if (backFromTransfer) {
-    backFromTransfer.addEventListener('click', () => {
-        transferScreen.classList.remove('active');
+        pushScreen(transferScreen);
     });
 }
 
@@ -420,21 +448,19 @@ if (backFromTransfer) {
 
 const setupScreen = document.getElementById('setupScreen');
 const setupPhoneStep = document.getElementById('setupPhoneStep');
-const backFromSetup = document.getElementById('backFromSetup');
 
 // Open setup screen when any transfer item is clicked
 document.querySelectorAll('.transfer-item').forEach(item => {
     item.addEventListener('click', () => {
         transferScreen.classList.remove('active');
+        // Убираем transferScreen из стека, т.к. мы заменяем его на setupScreen
+        if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+            screenStack.pop();
+        }
         setupScreen.classList.add('active');
+        pushScreen(setupScreen);
     });
 });
-
-if (backFromSetup) {
-    backFromSetup.addEventListener('click', () => {
-        setupScreen.classList.remove('active');
-    });
-}
 
 // ==================== МОДАЛЬНОЕ ОКНО ТЕЛЕФОНА ====================
 
