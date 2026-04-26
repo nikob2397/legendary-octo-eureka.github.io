@@ -497,6 +497,7 @@
     font-size: 14px; font-weight: 600;
     padding: 4px 12px;
     border-radius: 12px;
+    border: solid 3px #17212b;
 }
 
 .setup-title {
@@ -649,163 +650,134 @@
 }
 .phone-modal-btn:active { opacity: 0.8; }
 
-/* ===== ЭКРАНЫ ФОРМ ПЕРЕВОДОВ ===== */
-.transfer-form-screen {
+/* ===== ЭКРАН ВВОДА КОДА ПОДТВЕРЖДЕНИЯ ===== */
+.pin-screen {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #17212b;
-    z-index: 1000;
-    flex-direction: column;
-}
-.transfer-form-screen.active { display: flex; }
-
-.transfer-form-header {
-    display: flex;
-    align-items: center;
+    z-index: 3000;
+    align-items: flex-end;
     justify-content: center;
-    padding: 16px 20px;
-    min-height: 56px;
 }
-.transfer-form-header-title { font-size: 20px; font-weight: 700; }
+.pin-screen.active { display: flex; }
 
-.transfer-form-content {
-    flex: 1;
+.pin-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+}
+
+.pin-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    background-color: #1a1d29;
+    border-radius: 24px 24px 0 0;
+    padding: 20px 20px 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 20px;
+    animation: slideUp 0.3s ease;
+    min-height: 70vh;
 }
 
-.transfer-form-icon {
-    width: 80px; height: 80px; border-radius: 50%;
+.pin-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 40px; height: 40px; border-radius: 50%;
+    background-color: rgba(255,255,255,0.1); border: none;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    z-index: 10;
+}
+.pin-close svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2; fill: none; }
+
+.pin-icon {
+    width: 80px; height: 80px;
+    margin: 40px 0 32px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px;
+    background: linear-gradient(180deg, #4ab6e5 0%, #2e8bd1 100%);
+    border-radius: 24px;
 }
-.transfer-form-icon.blue { background: linear-gradient(180deg,rgba(98, 182, 229, 1) 0%, rgba(46, 139, 209, 1) 100%); }
-.transfer-form-icon.teal { background: linear-gradient(180deg,rgba(74, 179, 112, 1) 0%, rgba(32, 138, 63, 1) 100%); }
-.transfer-form-icon svg { width: 40px; height: 40px; fill: #fff; }
+.pin-icon svg { width: 40px; height: 40px; }
 
-.transfer-form-subtitle {
-    font-size: 18px; font-weight: 600;
-    margin-bottom: 32px;
-    text-align: center;
-}
-
-.form-group {
-    width: 100%;
+.pin-dots {
+    display: flex;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
-.form-label {
-    display: block;
-    font-size: 14px;
-    color: #7d8b99;
+.pin-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    background-color: transparent;
+    transition: all 0.15s ease;
+}
+.pin-dot.filled {
+    background-color: #fff;
+    border-color: #fff;
+}
+.pin-dot.active {
+    border-color: #2b9ce1;
+    box-shadow: 0 0 0 2px rgba(43, 156, 225, 0.3);
+}
+.pin-dot.error {
+    border-color: #e74c3c;
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+.pin-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #8e8e93;
     margin-bottom: 8px;
 }
 
-.form-input {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 1px solid #242f3d;
-    background-color: #242f3d;
-    color: #ffffff;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.2s;
-}
-.form-input:focus {
-    border-color: #2b9ce1;
-}
-.form-input::placeholder {
-    color: #7d8b99;
-}
-
-.form-hint {
-    width: 100%;
-    font-size: 13px;
-    color: #7d8b99;
-    margin-bottom: 24px;
-    line-height: 1.4;
-    text-align: center;
-}
-
-.form-submit-btn {
-    width: 100%;
-    padding: 16px;
-    border-radius: 16px; border: none;
-    background-color: #2b9ce1;
-    color: #ffffff;
-    font-size: 17px; font-weight: 600;
-    cursor: pointer;
+.pin-error {
+    font-size: 14px;
+    color: #e74c3c;
+    min-height: 20px;
+    margin-bottom: 16px;
+    opacity: 0;
     transition: opacity 0.2s;
+}
+.pin-error.show { opacity: 1; }
+
+.pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 320px;
     margin-top: auto;
-}
-.form-submit-btn:active { opacity: 0.8; }
-.form-submit-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    padding-bottom: 20px;
 }
 
-/* ===== ЭКРАН РЕЗУЛЬТАТА ЧЕКА ===== */
-.check-result-screen {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #17212b;
-    z-index: 1000;
-    flex-direction: column;
-}
-.check-result-screen.active { display: flex; }
-
-.check-result-header {
+.pin-key {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    background-color: transparent;
+    color: #fff;
+    font-size: 28px;
+    font-weight: 400;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px 20px;
-    min-height: 56px;
+    transition: background-color 0.15s;
+    justify-self: center;
 }
-.check-result-header-title { font-size: 20px; font-weight: 700; }
-
-.check-result-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-}
-
-.check-result-icon {
-    width: 80px; height: 80px; border-radius: 50%;
-    background: linear-gradient(180deg,rgba(74, 179, 112, 1) 0%, rgba(32, 138, 63, 1) 100%);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 24px;
-}
-.check-result-icon svg { width: 40px; height: 40px; fill: #fff; }
-
-.check-result-title {
-    font-size: 24px; font-weight: 700;
-    margin-bottom: 12px;
-    text-align: center;
-}
-
-.check-result-amount {
-    font-size: 32px; font-weight: 700;
-    color: #2b9ce1;
-    margin-bottom: 24px;
-}
-
-.check-result-token {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 12px;
-    background-color: #242f3d;
-    color: #ffffff;
-    font-size: 14px;
-    font-family: monospace;
-    word-break: break-all;
-    margin-bottom: 16px;
-    text-align: center;
-    border: 1px solid #2b9ce1;
-}
+.pin-key:active { background-color: rgba(255,255,255,0.1); }
+.pin-key.empty { pointer-events: none; }
+.pin-key svg { width: 28px; height: 28px; stroke: #fff; }
