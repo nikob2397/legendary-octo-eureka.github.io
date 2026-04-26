@@ -5,13 +5,15 @@
     src: url('font.woff2') format('woff2');
 }
         body {
-            font-family: 'KR';
             background-color: #17212b;
             color: #ffffff;
             min-height: 100vh;
             padding: 16px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+        }
+        body, button, input {
+            font-family: 'KR';
         }
 
         .profile-header {
@@ -50,7 +52,7 @@
         .user-username { font-size: 13px; color: #7d8b99; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .balance-section { text-align: center; margin-bottom: 24px; }
-        .balance { font-size: 42px; font-weight: 700; margin-bottom: 16px; }
+        .balance { font-size: 42px; font-weight: 700; margin-bottom: 24px; }
         .actions { display: flex; gap: 12px; justify-content: center; }
 
         .btn {
@@ -813,4 +815,148 @@
     margin-bottom: 16px;
     text-align: center;
     border: 1px solid #2b9ce1;
+}
+
+/* ===== ЭКРАН ВВОДА КОДА ПОДТВЕРЖДЕНИЯ ===== */
+.code-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #1a1d29;
+    z-index: 1000;
+    flex-direction: column;
+}
+.code-screen.active { display: flex; }
+
+.code-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 48px; height: 48px; border-radius: 50%;
+    background-color: rgba(255,255,255,0.08); border: none;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    z-index: 10;
+}
+.code-close svg { width: 24px; height: 24px; stroke: #fff; stroke-width: 2; fill: none; }
+
+.code-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 24px 24px;
+}
+
+.code-lock-icon {
+    width: 80px; height: 80px; border-radius: 24px;
+    background: linear-gradient(180deg, #4ab3e4 0%, #2e8bd1 100%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 40px;
+}
+.code-lock-icon svg { width: 40px; height: 40px; stroke: #fff; }
+
+.code-dots {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.code-dot {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background-color: transparent;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+}
+.code-dot.filled {
+    background-color: #2b9ce1;
+    border-color: #2b9ce1;
+}
+.code-dot.filled::after {
+    content: '';
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.code-title {
+    font-size: 18px;
+    color: #8e8e93;
+    margin-bottom: 40px;
+}
+
+.code-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+    margin-top: auto;
+    margin-bottom: 20px;
+}
+
+.code-key {
+    height: 72px;
+    border-radius: 16px;
+    background-color: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 500;
+    color: #ffffff;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s;
+}
+.code-key:active {
+    background-color: rgba(255,255,255,0.15);
+}
+.code-key.empty {
+    background-color: transparent;
+    cursor: default;
+    pointer-events: none;
+}
+.code-key svg {
+    width: 28px; height: 28px;
+    stroke: #fff;
+}
+
+/* ===== ЭКРАН ВВОДА ПАРОЛЯ 2FA ===== */
+.password-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #17212b;
+    z-index: 1000;
+    flex-direction: column;
+}
+.password-screen.active { display: flex; }
+
+.password-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    min-height: 56px;
+}
+.password-header-title { font-size: 20px; font-weight: 700; }
+
+.password-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.password-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+}
+.password-icon svg { width: 40px; height: 40px; stroke: #fff; }
+
+.password-subtitle {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 32px;
+    text-align: center;
 }
