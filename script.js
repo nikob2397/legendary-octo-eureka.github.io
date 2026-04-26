@@ -106,7 +106,7 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.setHeaderColor('#17212b');
+        tg.setHeaderColor("#17212b");
 
         const user = tg.initDataUnsafe?.user;
         let currentUserId = null;
