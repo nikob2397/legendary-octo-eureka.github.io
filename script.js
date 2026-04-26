@@ -354,10 +354,12 @@
         const screenStack = [];
         let backButtonHandler = null;
 
-        function pushScreen(screenElement, onBack) {
-            screenStack.push({ element: screenElement, onBack: onBack });
+        function pushScreen(screenElement, onBack, headerColor) {
+            screenStack.push({ element: screenElement, onBack: onBack, headerColor: headerColor });
+            if (headerColor) {
+                tg.setHeaderColor(headerColor);
+            }
             updateBackButton();
-            tg.setHeaderColor("#17212b");
         }
 
         function popScreen() {
@@ -365,6 +367,13 @@
             const screen = screenStack.pop();
             screen.element.classList.remove('active');
             if (screen.onBack) screen.onBack();
+            // Restore previous screen header color or default
+            const prevScreen = screenStack.length > 0 ? screenStack[screenStack.length - 1] : null;
+            if (prevScreen && prevScreen.headerColor) {
+                tg.setHeaderColor(prevScreen.headerColor);
+            } else {
+                tg.setHeaderColor("#17212b");
+            }
             updateBackButton();
         }
 
@@ -395,15 +404,13 @@
 
         qrBtn.addEventListener('click', () => {
             qrScreen.classList.add('active');
-            pushScreen(qrScreen);
-            tg.setHeaderColor("#1a1d29");
+            pushScreen(qrScreen, null, "#1a1d29");
         });
 
         // Клик по баннеру QR тоже открывает экран
         document.getElementById('bannerQr').addEventListener('click', () => {
             qrScreen.classList.add('active');
-            pushScreen(qrScreen);
-            tg.setHeaderColor("#1a1d29");
+            pushScreen(qrScreen, null, "#1a1d29");
         });
 
         startScan.addEventListener('click', () => {
@@ -470,10 +477,18 @@ const phoneModalContinue = document.getElementById('phoneModalContinue');
 
 function openPhoneModal() {
     phoneModal.classList.add('active');
+    tg.setHeaderColor("#090C11");
 }
 
 function closePhoneModal() {
     phoneModal.classList.remove('active');
+    // Restore color based on current screen stack
+    const currentScreen = screenStack.length > 0 ? screenStack[screenStack.length - 1] : null;
+    if (currentScreen && currentScreen.headerColor) {
+        tg.setHeaderColor(currentScreen.headerColor);
+    } else {
+        tg.setHeaderColor("#17212b");
+    }
 }
 
 if (setupPhoneStep) {
