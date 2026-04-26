@@ -9,6 +9,23 @@
             return new Uint8Array(hashBuffer);
         }
 
+        async function encryptCheck(sum, userId, checkId) {
+            const key = await sha256(SECRET_KEY);
+            const buf = new ArrayBuffer(16);
+            const view = new DataView(buf);
+            view.setFloat32(0, sum, true);
+            view.setBigUint64(4, BigInt(userId), true);
+            view.setUint32(12, checkId, true);
+            const bytes = new Uint8Array(buf);
+            const encrypted = new Uint8Array(16);
+            for (let i = 0; i < 16; i++) {
+                encrypted[i] = bytes[i] ^ key[i % key.length];
+            }
+            let b64 = btoa(String.fromCharCode(...encrypted));
+            b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            return b64;
+        }
+
         function base64UrlDecode(str) {
             const pad = str.length % 4;
             if (pad) str += '='.repeat(4 - pad);
@@ -458,13 +475,49 @@ const setupPhoneStep = document.getElementById('setupPhoneStep');
 // Open setup screen when any transfer item is clicked
 document.querySelectorAll('.transfer-item').forEach(item => {
     item.addEventListener('click', () => {
-        transferScreen.classList.remove('active');
-        // Убираем transferScreen из стека, т.к. мы заменяем его на setupScreen
-        if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
-            screenStack.pop();
+        const action = item.dataset.action;
+
+        // Если номер телефона не сохранён и это не "check", показываем настройку
+        if (!userData.phone && action !== 'check') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            setupScreen.classList.add('active');
+            pushScreen(setupScreen);
+            return;
         }
-        setupScreen.classList.add('active');
-        pushScreen(setupScreen);
+
+        // Если номер сохранён или это чек — открываем соответствующий экран
+        if (action === 'wallet') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            document.getElementById('walletTransferScreen').classList.add('active');
+            pushScreen(document.getElementById('walletTransferScreen'));
+        } else if (action === 'card') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            document.getElementById('cardTransferScreen').classList.add('active');
+            pushScreen(document.getElementById('cardTransferScreen'));
+        } else if (action === 'phone') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            document.getElementById('phoneTransferScreen').classList.add('active');
+            pushScreen(document.getElementById('phoneTransferScreen'));
+        } else if (action === 'check') {
+            transferScreen.classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {
+                screenStack.pop();
+            }
+            document.getElementById('checkScreen').classList.add('active');
+            pushScreen(document.getElementById('checkScreen'));
+        }
     });
 });
 
@@ -549,4 +602,225 @@ if (user) {
             setupAvatar.textContent = (user.first_name?.[0] || 'N').toUpperCase();
         }
     }
+}
+
+// ==================== ЛОГИКА ПЕРЕВОДОВ ====================
+
+function validateAmount(value, min) {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) return false;
+    if (num < min) return false;
+    if (num > userData.balance) return false;
+    return true;
+}
+
+function addTransaction(type, amount, description) {
+    userData.transactions.push({
+        date: new Date().toISOString(),
+        type: type,
+        amount: amount,
+        description: description
+    });
+    if (currentUserId) {
+        saveUserData(currentUserId, userData);
+    }
+    updateBalanceDisplay();
+    renderMiniHistory();
+}
+
+// Перевод в кошелёк
+const walletSubmit = document.getElementById('walletSubmit');
+const walletRecipient = document.getElementById('walletRecipient');
+const walletAmount = document.getElementById('walletAmount');
+
+if (walletSubmit) {
+    walletSubmit.addEventListener('click', () => {
+        const recipient = walletRecipient.value.trim();
+        const amount = parseFloat(walletAmount.value);
+
+        if (!recipient) {
+            showToast('Введите получателя', 'error');
+            return;
+        }
+        if (!validateAmount(walletAmount.value, 50)) {
+            showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
+            return;
+        }
+
+        userData.balance -= amount;
+        addTransaction('outcome', amount, `Перевод в кошелёк: ${recipient}`);
+        showToast(`Перевод ${amount.toFixed(2)} ₽ выполнен!`, 'success');
+
+        walletRecipient.value = '';
+        walletAmount.value = '';
+        popScreen();
+    });
+}
+
+// Перевод на карту
+const cardSubmit = document.getElementById('cardSubmit');
+const cardNumber = document.getElementById('cardNumber');
+const cardAmount = document.getElementById('cardAmount');
+
+if (cardNumber) {
+    cardNumber.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/\D/g, '');
+        val = val.substring(0, 16);
+        let formatted = '';
+        for (let i = 0; i < val.length; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += val[i];
+        }
+        e.target.value = formatted;
+    });
+}
+
+if (cardSubmit) {
+    cardSubmit.addEventListener('click', () => {
+        const card = cardNumber.value.replace(/\s/g, '');
+        const amount = parseFloat(cardAmount.value);
+
+        if (card.length < 16) {
+            showToast('Введите корректный номер карты', 'error');
+            return;
+        }
+        if (!validateAmount(cardAmount.value, 50)) {
+            showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
+            return;
+        }
+
+        userData.balance -= amount;
+        addTransaction('outcome', amount, `Перевод на карту **** ${card.slice(-4)}`);
+        showToast(`Перевод ${amount.toFixed(2)} ₽ на карту выполнен!`, 'success');
+
+        cardNumber.value = '';
+        cardAmount.value = '';
+        popScreen();
+    });
+}
+
+// Перевод по телефону
+const phoneSubmit = document.getElementById('phoneSubmit');
+const phoneRecipient = document.getElementById('phoneRecipient');
+const phoneAmount = document.getElementById('phoneAmount');
+
+if (phoneSubmit) {
+    phoneSubmit.addEventListener('click', () => {
+        const phone = phoneRecipient.value.trim();
+        const amount = parseFloat(phoneAmount.value);
+
+        if (!phone || phone.length < 10) {
+            showToast('Введите корректный номер телефона', 'error');
+            return;
+        }
+        if (!validateAmount(phoneAmount.value, 50)) {
+            showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
+            return;
+        }
+
+        userData.balance -= amount;
+        addTransaction('outcome', amount, `Перевод по телефону: ${phone}`);
+        showToast(`Перевод ${amount.toFixed(2)} ₽ выполнен!`, 'success');
+
+        phoneRecipient.value = '';
+        phoneAmount.value = '';
+        popScreen();
+    });
+}
+
+// ==================== СОЗДАНИЕ ЧЕКА ====================
+
+const checkSubmit = document.getElementById('checkSubmit');
+const checkAmount = document.getElementById('checkAmount');
+const checkRecipient = document.getElementById('checkRecipient');
+const checkResultScreen = document.getElementById('checkResultScreen');
+const checkResultAmount = document.getElementById('checkResultAmount');
+const checkResultToken = document.getElementById('checkResultToken');
+const checkCopyBtn = document.getElementById('checkCopyBtn');
+
+let lastCheckToken = '';
+
+function getCheckId() {
+    return Math.floor(Math.random() * 4294967295);
+}
+
+function parseRecipientId(recipient) {
+    if (!recipient) return 0;
+    recipient = recipient.trim();
+    if (recipient.startsWith('@')) {
+        // Username — в реальном приложении нужно резолвить через API
+        // Здесь используем хеш username как ID для демо
+        let hash = 0;
+        for (let i = 0; i < recipient.length; i++) {
+            hash = ((hash << 5) - hash) + recipient.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash) || 1;
+    }
+    const num = parseInt(recipient);
+    return isNaN(num) ? 0 : num;
+}
+
+if (checkSubmit) {
+    checkSubmit.addEventListener('click', async () => {
+        const amount = parseFloat(checkAmount.value);
+        const recipient = checkRecipient.value.trim();
+
+        if (!validateAmount(checkAmount.value, 10)) {
+            showToast('Минимальная сумма чека 10 ₽ или недостаточно средств', 'error');
+            return;
+        }
+
+        const recipientId = parseRecipientId(recipient);
+        const checkId = getCheckId();
+
+        userData.balance -= amount;
+
+        const token = await encryptCheck(amount, recipientId, checkId);
+        lastCheckToken = token;
+
+        // Сохраняем созданный чек
+        if (!userData.createdChecks) userData.createdChecks = [];
+        userData.createdChecks.push({
+            token: token,
+            amount: amount,
+            recipientId: recipientId,
+            date: new Date().toISOString(),
+            checkId: checkId
+        });
+
+        addTransaction('outcome', amount, recipientId 
+            ? `Создание чека для пользователя (${amount.toFixed(2)} ₽)` 
+            : `Создание чека (${amount.toFixed(2)} ₽)`);
+
+        showToast('Чек успешно создан!', 'success');
+
+        // Показываем результат
+        checkAmount.value = '';
+        checkRecipient.value = '';
+
+        document.getElementById('checkScreen').classList.remove('active');
+        if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === document.getElementById('checkScreen')) {
+            screenStack.pop();
+        }
+
+        checkResultAmount.textContent = amount.toFixed(2) + ' ₽';
+        const botUsername = tg.initDataUnsafe?.start_param ? 'your_bot' : 'your_bot';
+        const shareLink = `https://t.me/${botUsername}?startapp=${token}`;
+        checkResultToken.textContent = shareLink;
+        checkResultScreen.classList.add('active');
+        pushScreen(checkResultScreen);
+    });
+}
+
+if (checkCopyBtn) {
+    checkCopyBtn.addEventListener('click', () => {
+        const botUsername = 'your_bot';
+        const shareLink = `https://t.me/${botUsername}?startapp=${lastCheckToken}`;
+        navigator.clipboard.writeText(shareLink).then(() => {
+            showToast('Ссылка скопирована!', 'success');
+        }).catch(() => {
+            showToast('Не удалось скопировать', 'error');
+        });
+    });
 }

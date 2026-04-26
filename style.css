@@ -497,7 +497,6 @@
     font-size: 14px; font-weight: 600;
     padding: 4px 12px;
     border-radius: 12px;
-    border: solid 3px #17212b;
 }
 
 .setup-title {
@@ -649,3 +648,164 @@
     transition: opacity 0.2s;
 }
 .phone-modal-btn:active { opacity: 0.8; }
+
+/* ===== ЭКРАНЫ ФОРМ ПЕРЕВОДОВ ===== */
+.transfer-form-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #17212b;
+    z-index: 1000;
+    flex-direction: column;
+}
+.transfer-form-screen.active { display: flex; }
+
+.transfer-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    min-height: 56px;
+}
+.transfer-form-header-title { font-size: 20px; font-weight: 700; }
+
+.transfer-form-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+}
+
+.transfer-form-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+}
+.transfer-form-icon.blue { background: linear-gradient(180deg,rgba(98, 182, 229, 1) 0%, rgba(46, 139, 209, 1) 100%); }
+.transfer-form-icon.teal { background: linear-gradient(180deg,rgba(74, 179, 112, 1) 0%, rgba(32, 138, 63, 1) 100%); }
+.transfer-form-icon svg { width: 40px; height: 40px; fill: #fff; }
+
+.transfer-form-subtitle {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    color: #7d8b99;
+    margin-bottom: 8px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #242f3d;
+    background-color: #242f3d;
+    color: #ffffff;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-input:focus {
+    border-color: #2b9ce1;
+}
+.form-input::placeholder {
+    color: #7d8b99;
+}
+
+.form-hint {
+    width: 100%;
+    font-size: 13px;
+    color: #7d8b99;
+    margin-bottom: 24px;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.form-submit-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px; border: none;
+    background-color: #2b9ce1;
+    color: #ffffff;
+    font-size: 17px; font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: auto;
+}
+.form-submit-btn:active { opacity: 0.8; }
+.form-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== ЭКРАН РЕЗУЛЬТАТА ЧЕКА ===== */
+.check-result-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #17212b;
+    z-index: 1000;
+    flex-direction: column;
+}
+.check-result-screen.active { display: flex; }
+
+.check-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    min-height: 56px;
+}
+.check-result-header-title { font-size: 20px; font-weight: 700; }
+
+.check-result-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.check-result-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(180deg,rgba(74, 179, 112, 1) 0%, rgba(32, 138, 63, 1) 100%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+}
+.check-result-icon svg { width: 40px; height: 40px; fill: #fff; }
+
+.check-result-title {
+    font-size: 24px; font-weight: 700;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.check-result-amount {
+    font-size: 32px; font-weight: 700;
+    color: #2b9ce1;
+    margin-bottom: 24px;
+}
+
+.check-result-token {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background-color: #242f3d;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: monospace;
+    word-break: break-all;
+    margin-bottom: 16px;
+    text-align: center;
+    border: 1px solid #2b9ce1;
+}
