@@ -154,6 +154,67 @@
     </div>
 
     <!-- ===== QR ЭКРАН ===== -->
+    <div class="qr-screen" id="qrScreen">
+        <div class="qr-header">
+            <div class="qr-header-title">Оплата по QR-коду</div>
+        </div>
+
+        <div class="qr-logo">
+            <svg width="97" height="120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/>
+                <path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/>
+                <path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/>
+                <path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/>
+                <path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/>
+                <path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/>
+                <path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/>
+                <path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/>
+            </svg>
+        </div>
+
+        <div class="qr-subtitle">Оплачивайте любые покупки с помощью криптовалюты.</div>
+
+        <div class="qr-steps-title">Как это работает</div>
+
+        <div class="qr-step">
+            <div class="qr-step-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/>
+                </svg>
+            </div>
+            <div class="qr-step-content">
+                <div class="qr-step-title">Отсканируйте код</div>
+                <div class="qr-step-desc">Наведите сканер на QR-код оплаты</div>
+            </div>
+        </div>
+
+        <div class="qr-step">
+            <div class="qr-step-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.73 1.36 4.73 4.04c-.01 2.08-1.58 2.99-3.67 3.03z"/>
+                </svg>
+            </div>
+            <div class="qr-step-content">
+                <div class="qr-step-title">Нажмите «Оплатить»</div>
+                <div class="qr-step-desc">Полученный QR-код будет обработан и оплата будет произведена в течение нескольких секунд.</div>
+            </div>
+        </div>
+
+        <div class="qr-step">
+            <div class="qr-step-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4h3V9h2v4h3l-4 4z"/>
+                </svg>
+            </div>
+            <div class="qr-step-content">
+                <div class="qr-step-title">Наслаждайтесь покупкой</div>
+                <div class="qr-step-desc">Вы получите уведомление об успешной оплате.</div>
+            </div>
+        </div>
+
+        <button class="qr-scan-btn" id="startScan">Отсканировать QR-код</button>
+    </div>
+
     <!-- ===== ЭКРАН НАСТРОЙКИ АККАУНТА ===== -->
     <div class="setup-screen" id="setupScreen">
         <div class="setup-header">
@@ -214,70 +275,6 @@
             <div class="phone-modal-desc">Поделитесь своим номером телефона в Telegram.</div>
             <button class="phone-modal-btn" id="phoneModalContinue">Продолжить</button>
         </div>
-    </div>
-
-    <div class="qr-screen" id="qrScreen">
-        <button class="qr-close" id="qrClose">
-            <svg viewBox="0 0 24 24">
-                <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-        </button>
-
-        <div class="qr-logo">
-            <svg width="97" height="120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 26.12l14.532 25.975v15.844L.017 93.863 0 26.12z" fill="#5B57A2"/>
-                <path d="M55.797 42.643l13.617-8.346 27.868-.026-41.485 25.414V42.643z" fill="#D90751"/>
-                <path d="M55.72 25.967l.077 34.39-14.566-8.95V0l14.49 25.967z" fill="#FAB718"/>
-                <path d="M97.282 34.271l-27.869.026-13.693-8.33L41.231 0l56.05 34.271z" fill="#ED6F26"/>
-                <path d="M55.797 94.007V77.322l-14.566-8.78.008 51.458 14.558-25.993z" fill="#63B22F"/>
-                <path d="M69.38 85.737L14.531 52.095 0 26.12l97.223 59.583-27.844.034z" fill="#1487C9"/>
-                <path d="M41.24 120l14.556-25.993 13.583-8.27 27.843-.034L41.24 120z" fill="#017F36"/>
-                <path d="M.017 93.863l41.333-25.32-13.896-8.526-12.922 7.922L.017 93.863z" fill="#984995"/>
-            </svg>
-        </div>
-
-        <div class="qr-title">Оплата по QR-коду</div>
-        <div class="qr-subtitle">Оплачивайте любые покупки с помощью криптовалюты.</div>
-
-        <div class="qr-steps-title">Как это работает</div>
-
-        <div class="qr-step">
-            <div class="qr-step-icon">
-                <svg viewBox="0 0 24 24">
-                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/>
-                </svg>
-            </div>
-            <div class="qr-step-content">
-                <div class="qr-step-title">Отсканируйте код</div>
-                <div class="qr-step-desc">Наведите сканер на QR-код оплаты</div>
-            </div>
-        </div>
-
-        <div class="qr-step">
-            <div class="qr-step-icon">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.73 1.36 4.73 4.04c-.01 2.08-1.58 2.99-3.67 3.03z"/>
-                </svg>
-            </div>
-            <div class="qr-step-content">
-                <div class="qr-step-title">Нажмите «Оплатить»</div>
-                <div class="qr-step-desc">Полученный QR-код будет обработан и оплата будет произведена в течение нескольких секунд.</div>
-            </div>
-        </div>
-
-        <div class="qr-step">
-            <div class="qr-step-icon">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4h3V9h2v4h3l-4 4z"/>
-                </svg>
-            </div>
-            <div class="qr-step-content">
-                <div class="qr-step-title">Наслаждайтесь покупкой</div>
-                <div class="qr-step-desc">Вы получите уведомление об успешной оплате.</div>
-            </div>
-        </div>
-
-        <button class="qr-scan-btn" id="startScan">Отсканировать QR-код</button>
     </div>
 
     <div class="toast" id="toast"></div>

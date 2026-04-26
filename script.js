@@ -106,7 +106,6 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.setHeaderColor(tg.themeParams.bg_color || '#17212b');
 
         const user = tg.initDataUnsafe?.user;
         let currentUserId = null;
@@ -349,11 +348,6 @@
             });
         });
 
-        // Клик по баннеру QR
-        document.getElementById('bannerQr').addEventListener('click', () => {
-            qrScreen.classList.add('active');
-        });
-
         // ==================== TELEGRAM BACK BUTTON ====================
         // Управление стеком экранов для навигации назад
         const screenStack = [];
@@ -391,22 +385,10 @@
             }
         }
 
-        // ==================== НАВИГАЦИЯ ====================
-
-        const allHistoryScreen = document.getElementById('allHistoryScreen');
-        const showAllHistoryBtn = document.getElementById('showAllHistory');
-
-        showAllHistoryBtn.addEventListener('click', () => {
-            renderFullHistory();
-            allHistoryScreen.classList.add('active');
-            pushScreen(allHistoryScreen);
-        });
-
         // ==================== QR-СКАНЕР ====================
 
         const qrScreen = document.getElementById('qrScreen');
         const qrBtn = document.getElementById('qrBtn');
-        const qrClose = document.getElementById('qrClose');
         const startScan = document.getElementById('startScan');
 
         qrBtn.addEventListener('click', () => {
@@ -414,8 +396,10 @@
             pushScreen(qrScreen);
         });
 
-        qrClose.addEventListener('click', () => {
-            popScreen();
+        // Клик по баннеру QR тоже открывает экран
+        document.getElementById('bannerQr').addEventListener('click', () => {
+            qrScreen.classList.add('active');
+            pushScreen(qrScreen);
         });
 
         startScan.addEventListener('click', () => {
@@ -430,6 +414,17 @@
             } else {
                 tg.showAlert('Сканер QR недоступен на этом устройстве');
             }
+        });
+
+        // ==================== НАВИГАЦИЯ ====================
+
+        const allHistoryScreen = document.getElementById('allHistoryScreen');
+        const showAllHistoryBtn = document.getElementById('showAllHistory');
+
+        showAllHistoryBtn.addEventListener('click', () => {
+            renderFullHistory();
+            allHistoryScreen.classList.add('active');
+            pushScreen(allHistoryScreen);
         });
 
 // ==================== ЭКРАН ПЕРЕВОДОВ ====================
