@@ -395,12 +395,14 @@
         qrBtn.addEventListener('click', () => {
             qrScreen.classList.add('active');
             pushScreen(qrScreen);
+            tg.setHeaderColor("#1a1d29");
         });
 
         // Клик по баннеру QR тоже открывает экран
         document.getElementById('bannerQr').addEventListener('click', () => {
             qrScreen.classList.add('active');
             pushScreen(qrScreen);
+            tg.setHeaderColor("#1a1d29");
         });
 
         startScan.addEventListener('click', () => {
