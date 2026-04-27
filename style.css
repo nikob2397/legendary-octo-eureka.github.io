@@ -959,3 +959,12 @@ body {
     text-align: center;
     border: 1px solid #2b9ce1;
 }
+/* ===== СТАТУС ТРАНЗАКЦИИ ===== */
+.tx-status {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.all-history-date .tx-status {
+    color: #f39c12;
+}
