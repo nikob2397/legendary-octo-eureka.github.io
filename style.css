@@ -363,13 +363,13 @@ body {
 
 .toast {
     width: 100%;
-    background-color: #17212b;
+    background-color: #242f3d;
     border-radius: 12px;
-    padding: 14px 16px;
+    padding: 16px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
     pointer-events: all;
     transform: translateY(-20px);
     opacity: 0;
