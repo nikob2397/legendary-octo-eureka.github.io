@@ -1014,3 +1014,34 @@ body {
     text-align: center;
     border: 1px solid #2b9ce1;
 }
+
+
+/* ===== ЭКРАН ИНСТРУКЦИИ ПО ПОПОЛНЕНИЮ ===== */
+.instruction-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #1a2332;
+    z-index: 1000;
+    flex-direction: column;
+}
+.instruction-screen.active { display: flex; }
+
+.instruction-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+    min-height: 56px;
+    background-color: #1a2332;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+.instruction-header-title { font-size: 20px; font-weight: 700; }
+
+.instruction-iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background-color: #1a2332;
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Как пополнить баланс?</title>
+    <style>
+
+@font-face {
+    font-family: 'KR';
+    src: url('font.woff2') format('woff2');
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'KR';
+            background-color: #1a2332;
+            color: #ffffff;
+            max-height: 100vh;
+            padding: 40px 20px 60px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 36px;
+            line-height: 1.2;
+        }
+
+        .step {
+            font-size: 14px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .card {
+            background-color: #1e2736;
+            border-radius: 20px;
+            padding: 10px 0;
+            margin: 0 auto 32px auto;
+            max-width: 300px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .phone-input {
+            padding: 0 20px 16px 20px;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 8px;
+            font-size: 18px;
+            color: #ffffff;
+            font-weight: 500;
+            min-height: 28px;
+        }
+
+        .phone-input .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 22px;
+            background-color: #8b5cf6;
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option.shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                115deg,
+                transparent,
+                rgba(255, 255, 255, 0.12),
+                transparent
+            );
+            animation: shine 5s ease-in-out infinite;
+            animation-delay: 1s;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            40% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        .option-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .option-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .option-text {
+            font-size: 16px;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.08);
+            margin: 0 20px;
+        }
+
+
+        .bank-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bank-item.shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                115deg,
+                transparent,
+                rgba(255, 255, 255, 0.12),
+                transparent
+            );
+            animation: shine 5s ease-in-out infinite;
+            animation-delay: 1.8s;
+            pointer-events: none;
+        }
+
+        .bank-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .bank-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .bank-name {
+            font-size: 16px;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1>Как пополнить баланс?</h1>
+
+    <div class="step">1. Откройте приложение Вашего банка и выберите «Перевод по мобильному номеру»</div>
+
+    <div class="step">2. Введите свой номер телефона и перейдите к выбору банка для перевода по СБП</div>
+
+    <div class="card">
+        <div class="phone-input" id="phoneInput">
+            <span id="phoneText">+7 </span><span class="cursor" id="cursor"></span>
+        </div>
+        <div class="option shine">
+            <div class="option-icon">
+                <img src="sbp.png" alt="СБП">
+            </div>
+            <div class="option-text">В другой банк через СБП</div>
+        </div>
+        <div class="divider"></div>
+        <div class="option">
+            <div class="option-icon">
+                <img src="na_kartu.png" alt="По карте">
+            </div>
+            <div class="option-text">Перевести по номеру карты</div>
+        </div>
+    </div>
+
+    <div class="step">3. Найдите банк «Яндекс» и выполните перевод нужной суммы</div>
+
+    <div class="card">
+        <div class="bank-list">
+            <div class="bank-item">
+                <div class="bank-icon">
+                    <img src="sber.png" alt="Сбербанк">
+                </div>
+                <div class="bank-name">Сбербанк</div>
+            </div>
+            <div class="divider"></div>
+            <div class="bank-item">
+                <div class="bank-icon">
+                    <img src="tbank.png" alt="Т-Банк">
+                </div>
+                <div class="bank-name">Т-Банк</div>
+            </div>
+            <div class="divider"></div>
+            <div class="bank-item shine">
+                <div class="bank-icon">
+                    <img src="yandex.png" alt="Яндекс">
+                </div>
+                <div class="bank-name">Яндекс</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const phoneText = document.getElementById('phoneText');
+        const cursor = document.getElementById('cursor');
+        const fullNumber = '+7 999';
+        const prefix = '+7 ';
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function animatePhone() {
+            while (true) {
+                // Type "999"
+                phoneText.textContent = prefix;
+                for (let i = 0; i < 3; i++) {
+                    await sleep(350);
+                    phoneText.textContent += '9';
+                }
+
+                // Wait 2 seconds
+                await sleep(2000);
+
+                // Fast erase
+                for (let i = 0; i < 3; i++) {
+                    await sleep(80);
+                    phoneText.textContent = phoneText.textContent.slice(0, -1);
+                }
+
+                // Short pause before repeat
+                await sleep(1500);
+            }
+        }
+
+        animatePhone();
+    </script>
+</body>
+</html>

@@ -29,7 +29,7 @@
     <div class="balance-section">
         <div class="balance" id="balance">0,00 ₽</div>
         <div class="actions">
-            <button class="btn btn-primary">+ Пополнить</button>
+            <button class="btn btn-primary" id="topUpBtn">+ Пополнить</button>
             <button class="btn btn-secondary" id="transferBtn">Перевести</button>
         </div>
     </div>
@@ -424,6 +424,14 @@
         <div class="form-hint">Отправьте эту ссылку получателю для активации чека.</div>
         <button class="form-submit-btn" id="checkCopyBtn">Копировать ссылку</button>
     </div>
+</div>
+
+<!-- ===== ЭКРАН ИНСТРУКЦИИ ПО ПОПОЛНЕНИЮ ===== -->
+<div class="instruction-screen" id="instructionScreen">
+    <div class="instruction-header">
+        <div class="instruction-header-title">Как пополнить баланс?</div>
+    </div>
+    <iframe src="instruction.html" class="instruction-iframe" id="instructionIframe"></iframe>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>

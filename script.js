@@ -470,6 +470,27 @@ if (transferBtn) {
     });
 }
 
+// ==================== ПОПОЛНЕНИЕ БАЛАНСА ====================
+
+const topUpBtn = document.getElementById('topUpBtn');
+const instructionScreen = document.getElementById('instructionScreen');
+
+if (topUpBtn) {
+    topUpBtn.addEventListener('click', () => {
+        if (!userData.phone) {
+            // Номер телефона не сохранён — показываем экран настройки
+            setupScreen.classList.add('active');
+            pushScreen(setupScreen);
+            showToast('Сначала укажите номер телефона', 'info');
+        } else {
+            // Номер телефона сохранён — показываем инструкцию
+            instructionScreen.classList.add('active');
+            pushScreen(instructionScreen, null, "#1a2332");
+        }
+    });
+}
+
+
 const setupScreen = document.getElementById('setupScreen');
 const setupPhoneStep = document.getElementById('setupPhoneStep');
 
