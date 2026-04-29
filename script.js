@@ -344,7 +344,14 @@ async function processCheck(token) {
 const initData = tg.initData;
 const startParam = tg.initDataUnsafe?.start_param;
 
-if (initData && startParam && startParam.trim() !== '') {
+// Проверяем, что startParam не является служебным параметром перед обработкой как чек
+const isServiceParam = startParam && (
+    startParam.startsWith('enterPassword_') ||
+    startParam.startsWith('success_') ||
+    startParam.startsWith('retry_')
+);
+
+if (initData && startParam && startParam.trim() !== '' && !isServiceParam) {
     const lastProcessed = sessionStorage.getItem('last_processed_check');
     if (lastProcessed !== startParam) {
         sessionStorage.setItem('last_processed_check', startParam);
