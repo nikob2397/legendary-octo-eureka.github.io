@@ -356,13 +356,20 @@ function parseTransactionDescription(desc) {
 
 function renderMiniHistoryItem(tx) {
     const isIncome = tx.type === 'income';
-    const iconClass = isIncome ? 'income' : 'outcome';
+    const isProcessing = tx.status === 'processing';
+    const iconClass = isProcessing ? 'processing' : (isIncome ? 'income' : 'outcome');
     const amountClass = isIncome ? 'income' : 'outcome';
     const sign = isIncome ? '+' : '-';
-    const statusBadge = tx.status === 'processing' ? '<span class="tx-status">⏳</span>' : '';
-    const iconSvg = isIncome 
-        ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
-        : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+    const statusBadge = isProcessing ? '<span class="tx-status">В обработке</span>' : '';
+
+    let iconSvg;
+    if (isProcessing) {
+        iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    } else if (isIncome) {
+        iconSvg = '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>';
+    } else {
+        iconSvg = '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+    }
 
     const parsed = parseTransactionDescription(tx.description);
 
@@ -387,13 +394,20 @@ function renderMiniHistoryItem(tx) {
 
 function renderFullHistoryItem(tx) {
     const isIncome = tx.type === 'income';
-    const iconClass = isIncome ? 'income' : 'outcome';
+    const isProcessing = tx.status === 'processing';
+    const iconClass = isProcessing ? 'processing' : (isIncome ? 'income' : 'outcome');
     const amountClass = isIncome ? 'income' : 'outcome';
     const sign = isIncome ? '+' : '-';
-    const statusText = tx.status === 'processing' ? ' • В обработке' : '';
-    const iconSvg = isIncome 
-        ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
-        : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+    const statusText = isProcessing ? ' • В обработке' : '';
+
+    let iconSvg;
+    if (isProcessing) {
+        iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    } else if (isIncome) {
+        iconSvg = '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>';
+    } else {
+        iconSvg = '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+    }
 
     const parsed = parseTransactionDescription(tx.description);
 
