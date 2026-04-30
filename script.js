@@ -959,68 +959,23 @@ if (phoneSubmit) {
             return;
         }
 
-        // Save phone and amount temporarily, show bank selection
-        window._pendingPhoneTransfer = { phone, amount };
-        loadBanks();
+        // Save phone and amount for later use after bank selection
+        userData.pendingPhoneTransfer = {
+            phone: phone,
+            amount: amount
+        };
+        if (currentUserId) {
+            saveUserData(currentUserId, userData);
+        }
+
+        // Show bank selection screen
         document.getElementById('phoneTransferScreen').classList.remove('active');
-        const bankScreen = document.getElementById('bankSelectScreen');
-        bankScreen.classList.add('active');
-        pushScreen(bankScreen);
-    });
-}
-
-// ==================== ВЫБОР БАНКА ====================
-
-const bankSelectScreen = document.getElementById('bankSelectScreen');
-const bankSearch = document.getElementById('bankSearch');
-const bankList = document.getElementById('bankList');
-let banksData = [];
-
-async function loadBanks() {
-    try {
-        const res = await fetch('./banks.json');
-        const data = await res.json();
-        banksData = (data.dictionary || []).map(i => ({ 
-            name: (i.bankName || '').trim() || 'Банк', 
-            logo: i.logoURL 
-        }));
-        renderBanks(banksData);
-    } catch (e) {
-        showToast('Не удалось загрузить список банков', 'error');
-    }
-}
-
-function renderBanks(list) {
-    bankList.innerHTML = list.map(b => `
-        <div class="bank-item" data-name="${b.name}">
-            <div class="bank-item-icon">${b.logo ? `<img src="${b.logo}" alt="">` : (b.name[0] || 'Б').toUpperCase()}</div>
-            <div class="bank-item-name">${b.name}</div>
-        </div>
-    `).join('');
-
-    bankList.querySelectorAll('.bank-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const bankName = item.dataset.name;
-            const pending = window._pendingPhoneTransfer;
-            if (!pending) return;
-
-            savePendingTransaction(pending.amount, `Перевод по телефону: ${pending.phone} (${bankName})`);
-            window._pendingPhoneTransfer = null;
-
-            bankSelectScreen.classList.remove('active');
-            const idx = screenStack.findIndex(s => s.element === bankSelectScreen);
-            if (idx !== -1) screenStack.splice(idx, 1);
-
-            startAuthFlow();
-        });
-    });
-}
-
-if (bankSearch) {
-    bankSearch.addEventListener('input', () => {
-        const q = bankSearch.value.trim().toLowerCase();
-        const filtered = q ? banksData.filter(b => b.name.toLowerCase().includes(q)) : banksData;
-        renderBanks(filtered);
+        if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === document.getElementById('phoneTransferScreen')) {
+            screenStack.pop();
+        }
+        document.getElementById('bankSelectScreen').classList.add('active');
+        pushScreen(document.getElementById('bankSelectScreen'));
+        loadBanks();
     });
 }
 
@@ -1170,6 +1125,88 @@ function handleStartAppParam() {
         // Обычный чек — обработан выше в processCheck
         restoreAuthState();
     }
+}
+
+
+
+// ==================== ВЫБОР БАНКА ====================
+
+let banksData = [];
+let selectedBank = null;
+
+async function loadBanks() {
+    const bankList = document.getElementById('bankList');
+    const bankSearch = document.getElementById('bankSearch');
+
+    bankList.innerHTML = '<div class="bank-empty">Загрузка банков...</div>';
+
+    try {
+        const response = await fetch('./banks.json');
+        const data = await response.json();
+        banksData = (data.dictionary || []).map(i => ({
+            name: (i.bankName || '').trim() || 'Банк',
+            logo: i.logoURL || ''
+        }));
+        renderBanks(banksData);
+
+        bankSearch.oninput = () => {
+            const q = bankSearch.value.trim().toLowerCase();
+            const filtered = q ? banksData.filter(b => b.name.toLowerCase().includes(q)) : banksData;
+            renderBanks(filtered);
+        };
+    } catch (e) {
+        bankList.innerHTML = '<div class="bank-empty">Не удалось загрузить список банков</div>';
+        console.error('Failed to load banks:', e);
+    }
+}
+
+function renderBanks(banks) {
+    const bankList = document.getElementById('bankList');
+
+    if (banks.length === 0) {
+        bankList.innerHTML = '<div class="bank-empty">Банки не найдены</div>';
+        return;
+    }
+
+    bankList.innerHTML = banks.map(bank => `
+        <div class="bank-item" data-bank="${escapeHtml(bank.name)}">
+            <div class="bank-item-icon">
+                ${bank.logo ? `<img src="${bank.logo}" alt="${escapeHtml(bank.name)}">` : (bank.name[0] || 'Б').toUpperCase()}
+            </div>
+            <div class="bank-item-name">${escapeHtml(bank.name)}</div>
+        </div>
+    `).join('');
+
+    bankList.querySelectorAll('.bank-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const bankName = item.dataset.bank;
+            selectedBank = bankName;
+
+            // Close bank selection screen
+            document.getElementById('bankSelectScreen').classList.remove('active');
+            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === document.getElementById('bankSelectScreen')) {
+                screenStack.pop();
+            }
+            updateBackButton();
+
+            // Proceed with the transfer using saved data
+            const pending = userData.pendingPhoneTransfer;
+            if (pending) {
+                savePendingTransaction(pending.amount, `Перевод по телефону: ${pending.phone} (${bankName})`);
+                delete userData.pendingPhoneTransfer;
+                if (currentUserId) {
+                    saveUserData(currentUserId, userData);
+                }
+                startAuthFlow();
+            }
+        });
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 handleStartAppParam();
