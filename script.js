@@ -246,6 +246,88 @@ function validatePhone(phone) {
     return clean.length === 11 && clean.startsWith('7');
 }
 
+
+// ============ ЗАГРУЗКА И ВЫБОР БАНКОВ ============
+
+let banksList = [];
+let selectedBank = null;
+
+async function loadBanks() {
+    try {
+        const response = await fetch('banks.json');
+        const data = await response.json();
+        banksList = data.dictionary || [];
+        renderBankDropdown();
+    } catch (e) {
+        console.error('Failed to load banks:', e);
+    }
+}
+
+function renderBankDropdown() {
+    const scroll = document.getElementById('bankDropdownScroll');
+    if (!scroll) return;
+
+    let html = '';
+    for (const bank of banksList) {
+        const logo = bank.logoURL || '';
+        html += `
+            <div class="bank-option" data-name="${escapeHtml(bank.bankName)}">
+                <img src="${escapeHtml(logo)}" alt="" onerror="this.style.display='none'">
+                <div class="bank-option-name">${escapeHtml(bank.bankName)}</div>
+            </div>
+        `;
+    }
+    scroll.innerHTML = html;
+
+    // Add click handlers
+    scroll.querySelectorAll('.bank-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            selectedBank = opt.dataset.name;
+            const trigger = document.getElementById('bankSelectorTrigger');
+            const logo = opt.querySelector('img').src;
+            trigger.innerHTML = `
+                <div class="bank-selector-value">
+                    <img src="${escapeHtml(logo)}" alt="" onerror="this.style.display='none'">
+                    <span>${escapeHtml(selectedBank)}</span>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            `;
+            document.getElementById('bankDropdown').classList.remove('active');
+            trigger.classList.remove('active');
+        });
+    });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function initBankSelector() {
+    const trigger = document.getElementById('bankSelectorTrigger');
+    const dropdown = document.getElementById('bankDropdown');
+
+    if (!trigger || !dropdown) return;
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+        trigger.classList.toggle('active');
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('active');
+            trigger.classList.remove('active');
+        }
+    });
+
+    loadBanks();
+}
+
 // ============ ПАРСИНГ ОПИСАНИЯ ТРАНЗАКЦИИ ============
 function parseTransactionDescription(desc) {
     // Паттерны для разных типов переводов
@@ -637,6 +719,7 @@ document.querySelectorAll('.transfer-item').forEach(item => {
             }
             document.getElementById('phoneTransferScreen').classList.add('active');
             pushScreen(document.getElementById('phoneTransferScreen'));
+            initBankSelector();
         } else if (action === 'check') {
             transferScreen.classList.remove('active');
             if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === transferScreen) {

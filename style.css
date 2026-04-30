@@ -860,6 +860,144 @@ input, button {
     text-align: center;
 }
 
+
+/* ===== ВЫБОР БАНКА ===== */
+.bank-selector {
+    position: relative;
+    width: 100%;
+}
+
+.bank-selector-trigger {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #242f3d;
+    background-color: #242f3d;
+    color: #ffffff;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.bank-selector-trigger:active {
+    opacity: 0.8;
+}
+
+.bank-selector-trigger.active {
+    border-color: #2b9ce1;
+}
+
+.bank-selector-trigger svg {
+    width: 20px;
+    height: 20px;
+    stroke: #7d8b99;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.bank-selector-trigger.active svg {
+    transform: rotate(180deg);
+}
+
+.bank-selector-placeholder {
+    color: #7d8b99;
+}
+
+.bank-selector-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.bank-selector-value img {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: contain;
+    background-color: #fff;
+    flex-shrink: 0;
+}
+
+.bank-selector-value span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bank-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: #242f3d;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    max-height: 280px;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.bank-dropdown.active {
+    display: block;
+}
+
+.bank-dropdown-scroll {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.bank-dropdown-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.bank-dropdown-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.bank-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+}
+
+.bank-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.bank-option:hover,
+.bank-option:active {
+    background-color: rgba(255,255,255,0.06);
+}
+
+.bank-option img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: contain;
+    background-color: #fff;
+    flex-shrink: 0;
+}
+
+.bank-option-name {
+    font-size: 15px;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* ===== ЭКРАНЫ ФОРМ ПЕРЕВОДОВ ===== */
 .transfer-form-screen {
     display: none;
