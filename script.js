@@ -490,7 +490,7 @@ if (topUpBtn) {
         } else {
             // Номер телефона сохранён — показываем инструкцию
             instructionScreen.classList.add('active');
-            pushScreen(instructionScreen, null, "#1a2332");
+            pushScreen(instructionScreen, null, "#17212b");
         }
     });
 }
