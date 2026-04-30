@@ -255,7 +255,7 @@
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
     </button>
-
+    
     <div class="code-content">
         <div class="code-lock-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -263,7 +263,7 @@
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
         </div>
-
+        
         <div class="code-dots">
             <div class="code-dot"></div>
             <div class="code-dot"></div>
@@ -271,9 +271,9 @@
             <div class="code-dot"></div>
             <div class="code-dot"></div>
         </div>
-
+        
         <div class="code-title">Введите код подтверждения</div>
-
+        
         <div class="code-keypad">
             <div class="code-key" data-digit="1">1</div>
             <div class="code-key" data-digit="2">2</div>
@@ -383,6 +383,17 @@
     </div>
 </div>
 
+<!-- ===== ЭКРАН ВЫБОРА БАНКА ===== -->
+<div class="transfer-form-screen" id="bankSelectScreen">
+    <div class="transfer-form-header">
+        <div class="transfer-form-header-title">Выберите банк</div>
+    </div>
+    <div class="bank-select-content">
+        <input type="text" class="bank-search-input" id="bankSearch" placeholder="Поиск банка">
+        <div class="bank-list" id="bankList"></div>
+    </div>
+</div>
+
 <!-- ===== ЭКРАН СОЗДАНИЯ ЧЕКА ===== -->
 <div class="transfer-form-screen" id="checkScreen">
     <div class="transfer-form-header">
@@ -403,17 +414,6 @@
         </div>
         <div class="form-hint">Если указать получателя, чек сможет активировать только этот пользователь.</div>
         <button class="form-submit-btn" id="checkSubmit">Создать чек</button>
-    </div>
-</div>
-
-<!-- ===== ЭКРАН ВЫБОРА БАНКА ===== -->
-<div class="bank-screen" id="bankScreen">
-    <div class="transfer-form-header">
-        <div class="transfer-form-header-title">Выберите банк</div>
-    </div>
-    <div class="bank-content">
-        <input type="text" class="bank-search" id="bankSearch" placeholder="Поиск">
-        <div class="bank-list" id="bankList"></div>
     </div>
 </div>
 
