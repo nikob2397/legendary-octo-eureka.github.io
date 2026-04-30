@@ -212,10 +212,10 @@ input, button {
     background-color: #17212b;
     border-radius: 12px;
     flex-shrink: 0;
-    height: 60px;
+    min-height: 60px;
 }
 
-.history-item-left { display: flex; align-items: center; gap: 10px; }
+.history-item-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
 .history-icon {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -227,10 +227,11 @@ input, button {
 .history-icon.outcome svg { fill: #e74c3c; width: 18px; height: 18px; }
 
 .history-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.history-desc { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.history-desc { font-size: 14px; font-weight: 500; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-desc-sub { font-size: 13px; color: #92B0D3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 .history-date { font-size: 11px; color: #7d8b99; margin-top: 1px; }
 
-.history-amount { font-size: 15px; font-weight: 600; }
+.history-amount { font-size: 15px; font-weight: 600; flex-shrink: 0; margin-left: 8px; white-space: nowrap; }
 .history-amount.income { color: #27ae60; }
 .history-amount.outcome { color: #e74c3c; }
 
@@ -283,7 +284,7 @@ input, button {
     border-radius: 14px;
 }
 
-.all-history-item-left { display: flex; align-items: center; gap: 12px; }
+.all-history-item-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
 .all-history-icon {
     width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -295,10 +296,11 @@ input, button {
 .all-history-icon.outcome svg { fill: #e74c3c; width: 22px; height: 22px; }
 
 .all-history-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.all-history-desc { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.all-history-desc { font-size: 15px; font-weight: 500; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.all-history-desc-sub { font-size: 14px; color: #92B0D3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 .all-history-date { font-size: 12px; color: #7d8b99; margin-top: 2px; }
 
-.all-history-amount { font-size: 16px; font-weight: 600; }
+.all-history-amount { font-size: 16px; font-weight: 600; flex-shrink: 0; margin-left: 8px; white-space: nowrap; }
 .all-history-amount.income { color: #27ae60; }
 .all-history-amount.outcome { color: #e74c3c; }
 
@@ -417,27 +419,6 @@ input, button {
 .toast-error .toast-icon { color: #f87171; }
 .toast-info .toast-icon { color: #60a5fa; }
 
-
-
-.history-detail {
-    font-size: 12px;
-    color: #92B0D3;
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 140px;
-}
-
-.all-history-detail {
-    font-size: 13px;
-    color: #92B0D3;
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
-}
 
 /* ===== ЭКРАН ПЕРЕВОДОВ ===== */
 .transfer-screen {
@@ -950,6 +931,18 @@ input, button {
 }
 .form-input::placeholder {
     color: #7d8b99;
+}
+
+/* Ошибка валидации — красная рамка */
+.form-input.input-error {
+    border-color: #e74c3c !important;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
 }
 
 .form-hint {
