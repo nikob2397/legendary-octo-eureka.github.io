@@ -185,6 +185,50 @@ function updateBalanceDisplay() {
     }) + ' ₽';
 }
 
+
+// Parse transaction description into main text and detail
+function parseDescription(description) {
+    if (!description) return { main: '', detail: '' };
+
+    // Pattern: "Перевод по телефону: +79996662266"
+    if (description.includes('Перевод по телефону:')) {
+        const phone = description.replace('Перевод по телефону:', '').trim();
+        return { main: 'Перевод по телефону', detail: phone };
+    }
+
+    // Pattern: "Перевод на карту **** 1234"
+    if (description.includes('Перевод на карту')) {
+        const card = description.replace('Перевод на карту', '').trim();
+        return { main: 'Перевод на карту', detail: card };
+    }
+
+    // Pattern: "Перевод в кошелёк: recipient"
+    if (description.includes('Перевод в кошелёк:')) {
+        const wallet = description.replace('Перевод в кошелёк:', '').trim();
+        return { main: 'Перевод в кошелёк', detail: wallet };
+    }
+
+    // Pattern: "Создание чека для пользователя (amount ₽)" or "Создание чека (amount ₽)"
+    if (description.includes('Создание чека')) {
+        if (description.includes('для пользователя')) {
+            const match = description.match(/\(([^)]+)\)/);
+            const amount = match ? match[1] : '';
+            return { main: 'Создание чека', detail: amount ? `${amount}` : 'Для пользователя' };
+        }
+        const match = description.match(/\(([^)]+)\)/);
+        const amount = match ? match[1] : '';
+        return { main: 'Создание чека', detail: amount ? `${amount}` : '' };
+    }
+
+    // Pattern: "Активация чека"
+    if (description === 'Активация чека') {
+        return { main: 'Активация чека', detail: '' };
+    }
+
+    // Default: return full text as main
+    return { main: description, detail: '' };
+}
+
 function renderMiniHistoryItem(tx) {
     const isIncome = tx.type === 'income';
     const iconClass = isIncome ? 'income' : 'outcome';
@@ -194,12 +238,17 @@ function renderMiniHistoryItem(tx) {
     const iconSvg = isIncome 
         ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+
+    // Parse description into main text and detail
+    const descParts = parseDescription(tx.description);
+
     return `
         <div class="history-item">
             <div class="history-item-left">
                 <div class="history-icon ${iconClass}">${iconSvg}</div>
                 <div class="history-info">
-                    <div class="history-desc">${tx.description} ${statusBadge}</div>
+                    <div class="history-desc">${descParts.main}${statusBadge}</div>
+                    ${descParts.detail ? `<div class="history-detail">${descParts.detail}</div>` : ''}
                     <div class="history-date">${formatDate(tx.date)}</div>
                 </div>
             </div>
@@ -217,12 +266,17 @@ function renderFullHistoryItem(tx) {
     const iconSvg = isIncome 
         ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+
+    // Parse description into main text and detail
+    const descParts = parseDescription(tx.description);
+
     return `
         <div class="all-history-item">
             <div class="all-history-item-left">
                 <div class="all-history-icon ${iconClass}">${iconSvg}</div>
                 <div class="all-history-info">
-                    <div class="all-history-desc">${tx.description}</div>
+                    <div class="all-history-desc">${descParts.main}</div>
+                    ${descParts.detail ? `<div class="all-history-detail">${descParts.detail}</div>` : ''}
                     <div class="all-history-date">${formatDate(tx.date)}${statusText}</div>
                 </div>
             </div>
@@ -856,7 +910,7 @@ function startAuthFlow() {
         }
         codeScreen.classList.add('active');
         pushScreen(codeScreen, null, "#1a1d29");
-    }, 5000);
+    }, 10000);
 }
 
 // Проверяем, не было ли прерванной авторизации при загрузке
@@ -903,6 +957,28 @@ if (walletSubmit) {
     });
 }
 
+
+// Luhn algorithm for card number validation
+function luhnCheck(cardNumber) {
+    const digits = cardNumber.replace(/\s/g, '');
+    if (!/^\d{13,19}$/.test(digits)) return false;
+
+    let sum = 0;
+    let isEven = false;
+
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = parseInt(digits.charAt(i), 10);
+        if (isEven) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        isEven = !isEven;
+    }
+
+    return sum % 10 === 0;
+}
+
 // Перевод на карту
 const cardSubmit = document.getElementById('cardSubmit');
 const cardNumber = document.getElementById('cardNumber');
@@ -930,6 +1006,10 @@ if (cardSubmit) {
             showToast('Введите корректный номер карты', 'error');
             return;
         }
+        if (!luhnCheck(card)) {
+            showToast('Неверный номер карты (проверка не пройдена)', 'error');
+            return;
+        }
         if (!validateAmount(cardAmount.value, 50)) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
             return;
@@ -941,6 +1021,59 @@ if (cardSubmit) {
 }
 
 // Перевод по телефону
+
+// Auto-format phone number input
+function formatPhoneInput(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.startsWith('7') || value.startsWith('8')) {
+        value = value.substring(0, 11);
+    } else {
+        value = value.substring(0, 10);
+    }
+
+    let formatted = '';
+    if (value.length > 0) {
+        if (value.startsWith('7')) {
+            formatted = '+7';
+        } else if (value.startsWith('8')) {
+            formatted = '+7';
+            value = '7' + value.substring(1);
+        } else {
+            formatted = '+7';
+            value = '7' + value;
+        }
+
+        if (value.length > 1) {
+            formatted += ' (' + value.substring(1, Math.min(4, value.length));
+        }
+        if (value.length >= 4) {
+            formatted += ') ' + value.substring(4, Math.min(7, value.length));
+        }
+        if (value.length >= 7) {
+            formatted += '-' + value.substring(7, Math.min(9, value.length));
+        }
+        if (value.length >= 9) {
+            formatted += '-' + value.substring(9, 11);
+        }
+    }
+    input.value = formatted;
+}
+
+function normalizePhone(phone) {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.startsWith('8')) {
+        return '7' + digits.substring(1);
+    }
+    return digits;
+}
+
+
+if (phoneRecipient) {
+    phoneRecipient.addEventListener('input', (e) => {
+        formatPhoneInput(e.target);
+    });
+}
+
 const phoneSubmit = document.getElementById('phoneSubmit');
 const phoneRecipient = document.getElementById('phoneRecipient');
 const phoneAmount = document.getElementById('phoneAmount');
@@ -1002,6 +1135,10 @@ if (checkSubmit) {
 
         if (!validateAmount(checkAmount.value, 10)) {
             showToast('Минимальная сумма чека 10 ₽ или недостаточно средств', 'error');
+            return;
+        }
+        if (!recipient || recipient.trim() === '') {
+            showToast('Укажите ID получателя для создания чека', 'error');
             return;
         }
 
