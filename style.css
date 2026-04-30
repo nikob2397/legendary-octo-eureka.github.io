@@ -175,7 +175,7 @@ input, button {
     border-radius: 24px;
     padding: 20px;
     min-height: 280px;
-    max-height: 280px;
+    max-height: 300px;
     display: flex;
     flex-direction: column;
 }
