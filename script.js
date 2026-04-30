@@ -951,7 +951,6 @@ const bankSearchInput = document.getElementById('bankSearchInput');
 const bankModalList = document.getElementById('bankModalList');
 const bankSelectBtn = document.getElementById('bankSelectBtn');
 
-// Загрузка списка банков
 async function loadBanks() {
     try {
         const response = await fetch('./banks.json');
@@ -968,35 +967,21 @@ async function loadBanks() {
 
 function renderBanksList(filter = '') {
     if (!bankModalList) return;
-
-    const filtered = filter 
-        ? banksData.filter(b => b.name.toLowerCase().includes(filter.toLowerCase()))
-        : banksData;
-
+    const filtered = filter ? banksData.filter(b => b.name.toLowerCase().includes(filter.toLowerCase())) : banksData;
     if (filtered.length === 0) {
         bankModalList.innerHTML = '<div class="bank-modal-empty">Банки не найдены</div>';
         return;
     }
-
     bankModalList.innerHTML = filtered.map(bank => {
         const isSelected = selectedBank && selectedBank.name === bank.name;
-        const iconHtml = bank.logo 
+        const iconHtml = bank.logo
             ? `<img src="${bank.logo}" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\'bank-initial\'>${bank.name[0]}</span>';">`
             : `<span class="bank-initial">${bank.name[0] || 'Б'}</span>`;
-        return `
-            <div class="bank-modal-item ${isSelected ? 'selected' : ''}" data-name="${bank.name}" data-logo="${bank.logo}">
-                <div class="bank-icon">${iconHtml}</div>
-                <div class="bank-name">${bank.name}</div>
-            </div>
-        `;
+        return `<div class="bank-modal-item ${isSelected ? 'selected' : ''}" data-name="${bank.name}" data-logo="${bank.logo}"><div class="bank-icon">${iconHtml}</div><div class="bank-name">${bank.name}</div></div>`;
     }).join('');
-
-    // Add click handlers
     bankModalList.querySelectorAll('.bank-modal-item').forEach(item => {
         item.addEventListener('click', () => {
-            const name = item.dataset.name;
-            const logo = item.dataset.logo;
-            selectedBank = { name, logo };
+            selectedBank = { name: item.dataset.name, logo: item.dataset.logo };
             updateBankSelectBtn();
             closeBankModal();
         });
@@ -1008,11 +993,7 @@ function updateBankSelectBtn() {
     const iconHtml = selectedBank.logo
         ? `<img src="${selectedBank.logo}" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\'bank-initial\'>${selectedBank.name[0]}</span>';">`
         : `<span class="bank-initial">${selectedBank.name[0] || 'Б'}</span>`;
-    bankSelectBtn.innerHTML = `
-        <div class="bank-icon">${iconHtml}</div>
-        <span class="bank-name">${selectedBank.name}</span>
-        <div class="bank-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
-    `;
+    bankSelectBtn.innerHTML = `<div class="bank-icon">${iconHtml}</div><span class="bank-name">${selectedBank.name}</span><div class="bank-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>`;
     bankSelectBtn.classList.add('active');
 }
 
@@ -1028,45 +1009,19 @@ function closeBankModal() {
     if (bankModal) bankModal.classList.remove('active');
 }
 
-// Event listeners for bank modal
-if (bankSelectBtn) {
-    bankSelectBtn.addEventListener('click', openBankModal);
-}
+if (bankSelectBtn) bankSelectBtn.addEventListener('click', openBankModal);
+if (bankModalOverlay) bankModalOverlay.addEventListener('click', closeBankModal);
+if (bankModalClose) bankModalClose.addEventListener('click', closeBankModal);
+if (bankSearchInput) bankSearchInput.addEventListener('input', (e) => renderBanksList(e.target.value));
 
-if (bankModalOverlay) {
-    bankModalOverlay.addEventListener('click', closeBankModal);
-}
-
-if (bankModalClose) {
-    bankModalClose.addEventListener('click', closeBankModal);
-}
-
-if (bankSearchInput) {
-    bankSearchInput.addEventListener('input', (e) => {
-        renderBanksList(e.target.value);
-    });
-}
-
-// Загружаем банки при старте
 loadBanks();
 
 // ===== ФОРМАТИРОВАНИЕ НОМЕРА ТЕЛЕФОНА =====
 function formatPhoneInput(input) {
     let value = input.value.replace(/\D/g, '');
-
-    // Если начинается с 8, заменяем на 7
-    if (value.length > 0 && value[0] === '8') {
-        value = '7' + value.slice(1);
-    }
-    // Если не начинается с 7, добавляем
-    if (value.length > 0 && value[0] !== '7') {
-        value = '7' + value;
-    }
-
-    // Ограничиваем 11 цифрами
+    if (value.length > 0 && value[0] === '8') value = '7' + value.slice(1);
+    if (value.length > 0 && value[0] !== '7') value = '7' + value;
     value = value.slice(0, 11);
-
-    // Форматируем
     let formatted = '+';
     if (value.length > 0) formatted += value[0];
     if (value.length > 1) formatted += ' (' + value.slice(1, 4);
@@ -1074,7 +1029,6 @@ function formatPhoneInput(input) {
     if (value.length > 4) formatted += ' ' + value.slice(4, 7);
     if (value.length > 7) formatted += '-' + value.slice(7, 9);
     if (value.length > 9) formatted += '-' + value.slice(9, 11);
-
     input.value = formatted;
 }
 
@@ -1085,29 +1039,15 @@ if (phoneRecipient) {
         const cursorPos = e.target.selectionStart;
         const prevLength = e.target.value.length;
         formatPhoneInput(e.target);
-        // Корректируем позицию курсора
         const newLength = e.target.value.length;
         const diff = newLength - prevLength;
         e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
     });
-
     phoneRecipient.addEventListener('keydown', (e) => {
-        // Разрешаем backspace, delete, стрелки
-        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Home', 'End'].includes(e.key)) {
-            return;
-        }
-        // Блокируем всё кроме цифр
-        if (!/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
-            e.preventDefault();
-        }
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Home', 'End'].includes(e.key)) return;
+        if (!/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
     });
-
-    // При фокусе, если пусто — ставим +7
-    phoneRecipient.addEventListener('focus', () => {
-        if (!phoneRecipient.value) {
-            phoneRecipient.value = '+7';
-        }
-    });
+    phoneRecipient.addEventListener('focus', () => { if (!phoneRecipient.value) phoneRecipient.value = '+7'; });
 }
 
 // Перевод по телефону
@@ -1132,7 +1072,6 @@ if (phoneSubmit) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
             return;
         }
-
         savePendingTransaction(amount, `Перевод по телефону: ${phone} (${selectedBank.name})`);
         startAuthFlow();
     });
