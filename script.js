@@ -437,6 +437,11 @@ document.getElementById('bannerQr').addEventListener('click', () => {
     pushScreen(qrScreen, null, "#1a1d29");
 });
 
+document.getElementById('bannerFest').addEventListener('click', () => {
+    transferScreen.classList.add('active');
+    pushScreen(transferScreen);
+});
+
 startScan.addEventListener('click', () => {
     if (tg.showScanQrPopup) {
         tg.showScanQrPopup({

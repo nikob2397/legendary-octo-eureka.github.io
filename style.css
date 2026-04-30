@@ -103,8 +103,8 @@ body {
     background: linear-gradient(135deg, rgba(43, 156, 225, 0.15) 0%, #242f3d 100%);
 }
 .banner-card.green {
-    border-left-color: #27ae60;
-    background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, #242f3d 100%);
+    border-left-color: #DEA82A;
+    background: linear-gradient(135deg, rgba(222, 168, 42, 0.15) 0%, #242f3d 100%);
 }
 
 .banner-icon {
@@ -122,7 +122,7 @@ body {
     margin-bottom: 4px;
 }
 .banner-card.blue .banner-title { color: #2b9ce1; }
-.banner-card.green .banner-title { color: #27ae60; }
+.banner-card.green .banner-title { color: #DEA82A; }
 .banner-desc {
     font-size: 14px;
     color: #ffffff;
@@ -363,13 +363,13 @@ body {
 
 .toast {
     width: 100%;
-    background-color: #17212b;
+    background-color: #242f3d;
     border-radius: 12px;
-    padding: 14px 16px;
+    padding: 16px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     pointer-events: all;
     transform: translateY(-20px);
     opacity: 0;

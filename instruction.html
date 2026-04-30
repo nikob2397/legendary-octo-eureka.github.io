@@ -19,11 +19,12 @@
 
         body {
             font-family: 'KR';
-            background-color: #1a2332;
+            background-color: #17212b;
             color: #ffffff;
             max-height: 100vh;
             padding: 40px 20px 60px 20px;
             -webkit-font-smoothing: antialiased;
+            user-select: none;
         }
 
         h1 {
@@ -38,22 +39,27 @@
             line-height: 1.2;
             margin-bottom: 20px;
             font-weight: 400;
-            opacity: 0.7;
+            color: #CAD2DB;
+        }
+        .step span {
+            font-weight: 800;
+            font-size: 16px;
+            color: #fff;
         }
 
         .card {
-            background-color: #1e2736;
+            background-color: #242f3d;
             border-radius: 20px;
             padding: 10px 0;
             margin: 0 auto 32px auto;
             max-width: 300px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .phone-input {
-            padding: 0 20px 16px 20px;
-            border-bottom: 3px solid rgba(255, 255, 255, 0.08);
+            padding: 5px 20px 10px 5px;
+            border-bottom: 2px solid rgba(139, 62, 252, 0.8);
             margin-bottom: 8px;
+            margin-left: 20px;
             font-size: 18px;
             color: #ffffff;
             font-weight: 500;
@@ -133,7 +139,8 @@
         .divider {
             height: 1px;
             background-color: rgba(255, 255, 255, 0.08);
-            margin: 0 20px;
+            margin: 0 0px;
+            margin-left: 73px;
         }
 
 
@@ -191,9 +198,9 @@
 <body>
     <h1>Как пополнить баланс?</h1>
 
-    <div class="step">1. Откройте приложение Вашего банка и выберите «Перевод по мобильному номеру»</div>
+    <div class="step"><span>1.</span> Откройте приложение Вашего банка и выберите «Перевод по мобильному номеру»</div>
 
-    <div class="step">2. Введите свой номер телефона и перейдите к выбору банка для перевода по СБП</div>
+    <div class="step"><span>2.</span> Введите свой номер телефона и перейдите к выбору банка для перевода через СБП</div>
 
     <div class="card">
         <div class="phone-input" id="phoneInput">
@@ -214,7 +221,7 @@
         </div>
     </div>
 
-    <div class="step">3. Найдите банк «Яндекс» и выполните перевод нужной суммы</div>
+    <div class="step"><span>3.</span> Найдите банк «Яндекс» и выполните перевод нужной суммы</div>
 
     <div class="card">
         <div class="bank-list">
