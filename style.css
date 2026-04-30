@@ -1049,3 +1049,39 @@ input, button {
     border: none;
     background-color: #1a2332;
 }
+
+/* ===== SPINNER ===== */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #ffffff;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.btn-loading {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.btn-loading .spinner {
+    margin-right: 0;
+}
+
+.code-keypad {
+    transition: opacity 0.3s;
+}
+
+.code-title .spinner,
+.password-subtitle .spinner {
+    margin-right: 8px;
+}

