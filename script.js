@@ -185,6 +185,93 @@ function updateBalanceDisplay() {
     }) + ' ₽';
 }
 
+// ============ ВАЛИДАЦИЯ НОМЕРА КАРТЫ (АЛГОРИТМ ЛУНА) ============
+function luhnCheck(cardNumber) {
+    // Удаляем все пробелы
+    const clean = cardNumber.replace(/\s/g, '');
+    if (!/^\d+$/.test(clean)) return false;
+    if (clean.length < 13 || clean.length > 19) return false;
+
+    let sum = 0;
+    let isEven = false;
+
+    for (let i = clean.length - 1; i >= 0; i--) {
+        let digit = parseInt(clean.charAt(i), 10);
+        if (isEven) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        isEven = !isEven;
+    }
+
+    return sum % 10 === 0;
+}
+
+// ============ АВТОФОРМАТИРОВАНИЕ ТЕЛЕФОНА ============
+function formatPhoneInput(input) {
+    let value = input.value.replace(/\D/g, '');
+
+    // Если пусто или начинается не с 7, добавляем +7
+    if (value.length === 0) {
+        input.value = '';
+        return;
+    }
+
+    // Убираем лидирующую 7 если пользователь её ввёл
+    if (value.startsWith('7')) {
+        value = value.substring(1);
+    }
+
+    let formatted = '+7';
+
+    if (value.length > 0) {
+        formatted += ' (' + value.substring(0, 3);
+    }
+    if (value.length >= 3) {
+        formatted += ') ' + value.substring(3, 6);
+    }
+    if (value.length >= 6) {
+        formatted += '-' + value.substring(6, 8);
+    }
+    if (value.length >= 8) {
+        formatted += '-' + value.substring(8, 10);
+    }
+
+    input.value = formatted;
+}
+
+function validatePhone(phone) {
+    const clean = phone.replace(/\D/g, '');
+    return clean.length === 11 && clean.startsWith('7');
+}
+
+// ============ ПАРСИНГ ОПИСАНИЯ ТРАНЗАКЦИИ ============
+function parseTransactionDescription(desc) {
+    // Паттерны для разных типов переводов
+    const patterns = [
+        { regex: /^(Перевод в кошелёк):\s*(.+)$/, label: 'Перевод в кошелёк' },
+        { regex: /^(Перевод на карту)\s*(.+)$/, label: 'Перевод на карту' },
+        { regex: /^(Перевод по телефону):\s*(.+)$/, label: 'Перевод по телефону' },
+        { regex: /^(Создание чека)(?:\s*для\s*пользователя)?\s*\((.+)\s*₽\)$/, label: 'Создание чека' },
+        { regex: /^(Создание чека)\s*\((.+)\s*₽\)$/, label: 'Создание чека' },
+        { regex: /^(Активация чека)$/, label: 'Активация чека' }
+    ];
+
+    for (const pattern of patterns) {
+        const match = desc.match(pattern.regex);
+        if (match) {
+            return {
+                mainText: pattern.label,
+                subText: match[2] || ''
+            };
+        }
+    }
+
+    // Для остальных случаев — возвращаем как есть
+    return { mainText: desc, subText: '' };
+}
+
 function renderMiniHistoryItem(tx) {
     const isIncome = tx.type === 'income';
     const iconClass = isIncome ? 'income' : 'outcome';
@@ -194,12 +281,20 @@ function renderMiniHistoryItem(tx) {
     const iconSvg = isIncome 
         ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+
+    const parsed = parseTransactionDescription(tx.description);
+
+    let descHtml = `<div class="history-desc">${parsed.mainText}${statusBadge}</div>`;
+    if (parsed.subText) {
+        descHtml += `<div class="history-desc-sub">${parsed.subText}</div>`;
+    }
+
     return `
         <div class="history-item">
             <div class="history-item-left">
                 <div class="history-icon ${iconClass}">${iconSvg}</div>
                 <div class="history-info">
-                    <div class="history-desc">${tx.description} ${statusBadge}</div>
+                    ${descHtml}
                     <div class="history-date">${formatDate(tx.date)}</div>
                 </div>
             </div>
@@ -217,12 +312,20 @@ function renderFullHistoryItem(tx) {
     const iconSvg = isIncome 
         ? '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>';
+
+    const parsed = parseTransactionDescription(tx.description);
+
+    let descHtml = `<div class="all-history-desc">${parsed.mainText}</div>`;
+    if (parsed.subText) {
+        descHtml += `<div class="all-history-desc-sub">${parsed.subText}</div>`;
+    }
+
     return `
         <div class="all-history-item">
             <div class="all-history-item-left">
                 <div class="all-history-icon ${iconClass}">${iconSvg}</div>
                 <div class="all-history-info">
-                    <div class="all-history-desc">${tx.description}</div>
+                    ${descHtml}
                     <div class="all-history-date">${formatDate(tx.date)}${statusText}</div>
                 </div>
             </div>
@@ -778,12 +881,12 @@ function savePendingTransaction(amount, description) {
 // Фиксирует pending транзакцию после успешной авторизации
 function commitPendingTransaction() {
     if (!userData.pending_transaction) return false;
-    
+
     const tx = userData.pending_transaction;
-    
+
     // Списываем сумму с баланса
     userData.balance -= tx.amount;
-    
+
     // Добавляем транзакцию в историю со статусом "processing"
     userData.transactions.push({
         date: tx.date,
@@ -792,14 +895,14 @@ function commitPendingTransaction() {
         description: tx.description,
         status: 'processing'
     });
-    
+
     // Удаляем pending
     delete userData.pending_transaction;
-    
+
     saveUserData(currentUserId, userData);
     updateBalanceDisplay();
     renderMiniHistory();
-    
+
     return true;
 }
 
@@ -891,13 +994,17 @@ if (walletSubmit) {
 
         if (!recipient) {
             showToast('Введите получателя', 'error');
+            walletRecipient.classList.add('input-error');
             return;
         }
         if (!validateAmount(walletAmount.value, 50)) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
+            walletAmount.classList.add('input-error');
             return;
         }
 
+        walletRecipient.classList.remove('input-error');
+        walletAmount.classList.remove('input-error');
         savePendingTransaction(amount, `Перевод в кошелёк: ${recipient}`);
         startAuthFlow();
     });
@@ -918,6 +1025,8 @@ if (cardNumber) {
             formatted += val[i];
         }
         e.target.value = formatted;
+        // Убираем ошибку при вводе
+        e.target.classList.remove('input-error');
     });
 }
 
@@ -926,153 +1035,64 @@ if (cardSubmit) {
         const card = cardNumber.value.replace(/\s/g, '');
         const amount = parseFloat(cardAmount.value);
 
-        if (card.length < 16) {
+        if (card.length < 13 || !luhnCheck(cardNumber.value)) {
             showToast('Введите корректный номер карты', 'error');
+            cardNumber.classList.add('input-error');
             return;
         }
         if (!validateAmount(cardAmount.value, 50)) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
+            cardAmount.classList.add('input-error');
             return;
         }
 
-        savePendingTransaction(amount, `Перевод на карту **** ${card.slice(-4)}`);
+        cardNumber.classList.remove('input-error');
+        cardAmount.classList.remove('input-error');
+        savePendingTransaction(amount, `Перевод на карту ${cardNumber.value}`);
         startAuthFlow();
     });
 }
 
-// ===== ЛОГИКА ВЫБОРА БАНКА =====
-let banksData = [];
-let selectedBank = null;
-
-const bankModal = document.getElementById('bankModal');
-const bankModalOverlay = document.getElementById('bankModalOverlay');
-const bankModalClose = document.getElementById('bankModalClose');
-const bankSearchInput = document.getElementById('bankSearchInput');
-const bankModalList = document.getElementById('bankModalList');
-const bankSelectBtn = document.getElementById('bankSelectBtn');
-
-async function loadBanks() {
-    try {
-        const response = await fetch('./banks.json');
-        const data = await response.json();
-        banksData = (data.dictionary || []).map(item => ({
-            name: (item.bankName || '').trim() || 'Банк',
-            logo: item.logoURL || ''
-        })).sort((a, b) => a.name.localeCompare(b.name));
-    } catch (e) {
-        console.error('Failed to load banks:', e);
-        banksData = [];
-    }
-}
-
-function renderBanksList(filter = '') {
-    if (!bankModalList) return;
-    const filtered = filter ? banksData.filter(b => b.name.toLowerCase().includes(filter.toLowerCase())) : banksData;
-    if (filtered.length === 0) {
-        bankModalList.innerHTML = '<div class="bank-modal-empty">Банки не найдены</div>';
-        return;
-    }
-    bankModalList.innerHTML = filtered.map(bank => {
-        const isSelected = selectedBank && selectedBank.name === bank.name;
-        const iconHtml = bank.logo
-            ? `<img src="${bank.logo}" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\'bank-initial\'>${bank.name[0]}</span>';">`
-            : `<span class="bank-initial">${bank.name[0] || 'Б'}</span>`;
-        return `<div class="bank-modal-item ${isSelected ? 'selected' : ''}" data-name="${bank.name}" data-logo="${bank.logo}"><div class="bank-icon">${iconHtml}</div><div class="bank-name">${bank.name}</div></div>`;
-    }).join('');
-    bankModalList.querySelectorAll('.bank-modal-item').forEach(item => {
-        item.addEventListener('click', () => {
-            selectedBank = { name: item.dataset.name, logo: item.dataset.logo };
-            updateBankSelectBtn();
-            closeBankModal();
-        });
-    });
-}
-
-function updateBankSelectBtn() {
-    if (!bankSelectBtn || !selectedBank) return;
-    const iconHtml = selectedBank.logo
-        ? `<img src="${selectedBank.logo}" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\'bank-initial\'>${selectedBank.name[0]}</span>';">`
-        : `<span class="bank-initial">${selectedBank.name[0] || 'Б'}</span>`;
-    bankSelectBtn.innerHTML = `<div class="bank-icon">${iconHtml}</div><span class="bank-name">${selectedBank.name}</span><div class="bank-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>`;
-    bankSelectBtn.classList.add('active');
-}
-
-function openBankModal() {
-    if (bankModal) {
-        bankModal.classList.add('active');
-        renderBanksList(bankSearchInput ? bankSearchInput.value : '');
-        if (bankSearchInput) bankSearchInput.focus();
-    }
-}
-
-function closeBankModal() {
-    if (bankModal) bankModal.classList.remove('active');
-}
-
-if (bankSelectBtn) bankSelectBtn.addEventListener('click', openBankModal);
-if (bankModalOverlay) bankModalOverlay.addEventListener('click', closeBankModal);
-if (bankModalClose) bankModalClose.addEventListener('click', closeBankModal);
-if (bankSearchInput) bankSearchInput.addEventListener('input', (e) => renderBanksList(e.target.value));
-
-loadBanks();
-
-// ===== ФОРМАТИРОВАНИЕ НОМЕРА ТЕЛЕФОНА =====
-function formatPhoneInput(input) {
-    let value = input.value.replace(/\D/g, '');
-    if (value.length > 0 && value[0] === '8') value = '7' + value.slice(1);
-    if (value.length > 0 && value[0] !== '7') value = '7' + value;
-    value = value.slice(0, 11);
-    let formatted = '+';
-    if (value.length > 0) formatted += value[0];
-    if (value.length > 1) formatted += ' (' + value.slice(1, 4);
-    if (value.length >= 4) formatted += ')';
-    if (value.length > 4) formatted += ' ' + value.slice(4, 7);
-    if (value.length > 7) formatted += '-' + value.slice(7, 9);
-    if (value.length > 9) formatted += '-' + value.slice(9, 11);
-    input.value = formatted;
-}
-
-const phoneRecipient = document.getElementById('phoneRecipient');
-
-if (phoneRecipient) {
-    phoneRecipient.addEventListener('input', (e) => {
-        const cursorPos = e.target.selectionStart;
-        const prevLength = e.target.value.length;
-        formatPhoneInput(e.target);
-        const newLength = e.target.value.length;
-        const diff = newLength - prevLength;
-        e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
-    });
-    phoneRecipient.addEventListener('keydown', (e) => {
-        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Home', 'End'].includes(e.key)) return;
-        if (!/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
-    });
-    phoneRecipient.addEventListener('focus', () => { if (!phoneRecipient.value) phoneRecipient.value = '+7'; });
-}
-
 // Перевод по телефону
 const phoneSubmit = document.getElementById('phoneSubmit');
+const phoneRecipient = document.getElementById('phoneRecipient');
 const phoneAmount = document.getElementById('phoneAmount');
+
+if (phoneRecipient) {
+    // Автоформатирование телефона
+    phoneRecipient.addEventListener('input', (e) => {
+        formatPhoneInput(e.target);
+        // Убираем ошибку при вводе
+        e.target.classList.remove('input-error');
+    });
+
+    // При фокусе, если пусто — ставим +7
+    phoneRecipient.addEventListener('focus', () => {
+        if (!phoneRecipient.value) {
+            phoneRecipient.value = '+7';
+        }
+    });
+}
 
 if (phoneSubmit) {
     phoneSubmit.addEventListener('click', () => {
         const phone = phoneRecipient.value.trim();
         const amount = parseFloat(phoneAmount.value);
-        const digitsOnly = phone.replace(/\D/g, '');
 
-        if (!phone || digitsOnly.length < 11) {
+        if (!validatePhone(phone)) {
             showToast('Введите корректный номер телефона', 'error');
-            return;
-        }
-        if (!selectedBank) {
-            showToast('Выберите банк получателя', 'error');
+            phoneRecipient.classList.add('input-error');
             return;
         }
         if (!validateAmount(phoneAmount.value, 50)) {
             showToast('Минимальная сумма 50 ₽ или недостаточно средств', 'error');
+            phoneAmount.classList.add('input-error');
             return;
         }
-        savePendingTransaction(amount, `Перевод по телефону: ${phone} (${selectedBank.name})`);
+
+        phoneRecipient.classList.remove('input-error');
+        phoneAmount.classList.remove('input-error');
+        savePendingTransaction(amount, `Перевод по телефону: ${phone}`);
         startAuthFlow();
     });
 }
@@ -1113,10 +1133,21 @@ if (checkSubmit) {
         const amount = parseFloat(checkAmount.value);
         const recipient = checkRecipient.value.trim();
 
-        if (!validateAmount(checkAmount.value, 10)) {
-            showToast('Минимальная сумма чека 10 ₽ или недостаточно средств', 'error');
+        // Проверяем, что ID получателя обязателен
+        if (!recipient) {
+            showToast('Укажите ID получателя', 'error');
+            checkRecipient.classList.add('input-error');
             return;
         }
+
+        if (!validateAmount(checkAmount.value, 10)) {
+            showToast('Минимальная сумма чека 10 ₽ или недостаточно средств', 'error');
+            checkAmount.classList.add('input-error');
+            return;
+        }
+
+        checkRecipient.classList.remove('input-error');
+        checkAmount.classList.remove('input-error');
 
         const recipientId = parseRecipientId(recipient);
         const checkId = getCheckId();
@@ -1135,9 +1166,7 @@ if (checkSubmit) {
             checkId: checkId
         });
 
-        addTransaction('outcome', amount, recipientId 
-            ? `Создание чека для пользователя (${amount.toFixed(2)} ₽)` 
-            : `Создание чека (${amount.toFixed(2)} ₽)`);
+        addTransaction('outcome', amount, `Создание чека для пользователя (${amount.toFixed(2)} ₽)`);
 
         showToast('Чек успешно создан!', 'success');
 
@@ -1190,19 +1219,19 @@ function handleStartAppParam() {
         if (targetUserId === currentUserId) {
             // Фиксируем pending транзакцию в localStorage
             const committed = commitPendingTransaction();
-            
+
             // Очищаем флаг авторизации
             if (userData.pending_auth) {
                 delete userData.pending_auth;
                 saveUserData(currentUserId, userData);
             }
-            
+
             if (committed) {
                 showToast('Перевод подтверждён!', 'success');
             } else {
                 showToast('Перевод уже обработан', 'info');
             }
-            
+
             // Очищаем start_param из URL, чтобы при повторном открытии не сработало снова
             if (window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
