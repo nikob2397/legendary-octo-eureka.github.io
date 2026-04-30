@@ -813,17 +813,38 @@ function clearPendingTransaction() {
 
 function startAuthFlow() {
     const botUsername = 'YaBank_bot';
-    
+
     // Сохраняем флаг, что мы в процессе авторизации
     userData.pending_auth = true;
     saveUserData(currentUserId, userData);
-    
+
     // Открываем бота для создания сессии
     tg.openTelegramLink(`https://t.me/${botUsername}?start=createSession_${currentUserId}`);
-    
-    // Через 1.5 секунды показываем экран ввода кода
+
+    // Показываем спиннер на кнопке после отправки, ожидаем 5 секунд
+    const activeForm = document.querySelector('.transfer-form-screen.active');
+    let submitBtn = null;
+    if (activeForm) {
+        submitBtn = activeForm.querySelector('.form-submit-btn');
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('btn-loading');
+        const originalText = submitBtn.textContent;
+        submitBtn.innerHTML = '<span class="spinner"></span>Ожидание ответа...';
+        submitBtn.dataset.originalText = originalText;
+    }
+
+    // Через 5 секунд показываем экран ввода кода
     // (пользователь уже получил код в боте)
     setTimeout(() => {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.textContent = submitBtn.dataset.originalText || 'Перевести';
+        }
+
         const activeForm = document.querySelector('.transfer-form-screen.active');
         if (activeForm) {
             activeForm.classList.remove('active');
@@ -835,7 +856,7 @@ function startAuthFlow() {
         }
         codeScreen.classList.add('active');
         pushScreen(codeScreen, null, "#1a1d29");
-    }, 1500);
+    }, 5000);
 }
 
 // Проверяем, не было ли прерванной авторизации при загрузке
