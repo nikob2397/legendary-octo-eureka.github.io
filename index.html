@@ -361,17 +361,6 @@
     </div>
 </div>
 
-<!-- ===== ЭКРАН ВЫБОРА БАНКА ===== -->
-<div class="transfer-form-screen" id="bankSelectScreen">
-    <div class="transfer-form-header">
-        <div class="transfer-form-header-title">Выберите банк</div>
-    </div>
-    <div class="bank-select-content">
-        <input type="text" class="bank-search-input" id="bankSearch" placeholder="Поиск банка">
-        <div class="bank-list" id="bankList"></div>
-    </div>
-</div>
-
 <!-- ===== ЭКРАН ПЕРЕВОДА ПО ТЕЛЕФОНУ ===== -->
 <div class="transfer-form-screen" id="phoneTransferScreen">
     <div class="transfer-form-header">
@@ -381,16 +370,41 @@
         <div class="transfer-form-icon blue">
             <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
         </div>
-        <div class="transfer-form-subtitle">Введите номер телефона</div>
+        <div class="transfer-form-subtitle">Введите данные получателя</div>
         <div class="form-group">
             <label class="form-label">Номер телефона</label>
-            <input type="tel" class="form-input" id="phoneRecipient" placeholder="+7 (999) 000-00-00">
+            <input type="tel" class="form-input" id="phoneRecipient" placeholder="+7 (999) 000-00-00" maxlength="18">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Банк получателя</label>
+            <button class="bank-select-btn" id="bankSelectBtn" type="button">
+                <div class="bank-icon"><span class="bank-initial">🏦</span></div>
+                <span class="bank-name">Выберите банк</span>
+                <div class="bank-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+            </button>
         </div>
         <div class="form-group">
             <label class="form-label">Сумма (мин. 50 ₽)</label>
             <input type="number" class="form-input" id="phoneAmount" placeholder="0.00" min="50" step="0.01">
         </div>
         <button class="form-submit-btn" id="phoneSubmit">Перевести</button>
+    </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО ВЫБОРА БАНКА ===== -->
+<div class="bank-modal" id="bankModal">
+    <div class="bank-modal-overlay" id="bankModalOverlay"></div>
+    <div class="bank-modal-sheet">
+        <div class="bank-modal-header">
+            <div class="bank-modal-title">Выберите банк</div>
+            <button class="bank-modal-close" id="bankModalClose" type="button">
+                <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="bank-modal-search">
+            <input type="text" id="bankSearchInput" placeholder="Поиск банка...">
+        </div>
+        <div class="bank-modal-list" id="bankModalList"></div>
     </div>
 </div>
 

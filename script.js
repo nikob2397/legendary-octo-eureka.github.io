@@ -940,18 +940,192 @@ if (cardSubmit) {
     });
 }
 
+// ===== ЛОГИКА ВЫБОРА БАНКА =====
+let banksData = [];
+let selectedBank = null;
+
+const bankModal = document.getElementById('bankModal');
+const bankModalOverlay = document.getElementById('bankModalOverlay');
+const bankModalClose = document.getElementById('bankModalClose');
+const bankSearchInput = document.getElementById('bankSearchInput');
+const bankModalList = document.getElementById('bankModalList');
+const bankSelectBtn = document.getElementById('bankSelectBtn');
+
+// Загрузка списка банков
+async function loadBanks() {
+    try {
+        const response = await fetch('./banks.json');
+        const data = await response.json();
+        banksData = (data.dictionary || []).map(item => ({
+            name: (item.bankName || '').trim() || 'Банк',
+            logo: item.logoURL || ''
+        })).sort((a, b) => a.name.localeCompare(b.name));
+    } catch (e) {
+        console.error('Failed to load banks:', e);
+        banksData = [];
+    }
+}
+
+function renderBanksList(filter = '') {
+    if (!bankModalList) return;
+
+    const filtered = filter 
+        ? banksData.filter(b => b.name.toLowerCase().includes(filter.toLowerCase()))
+        : banksData;
+
+    if (filtered.length === 0) {
+        bankModalList.innerHTML = '<div class="bank-modal-empty">Банки не найдены</div>';
+        return;
+    }
+
+    bankModalList.innerHTML = filtered.map(bank => {
+        const isSelected = selectedBank && selectedBank.name === bank.name;
+        const iconHtml = bank.logo 
+            ? `<img src="${bank.logo}" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\'bank-initial\'>${bank.name[0]}</span>';">`
+            : `<span class="bank-initial">${bank.name[0] || 'Б'}</span>`;
+        return `
+            <div class="bank-modal-item ${isSelected ? 'selected' : ''}" data-name="${bank.name}" data-logo="${bank.logo}">
+                <div class="bank-icon">${iconHtml}</div>
+                <div class="bank-name">${bank.name}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Add click handlers
+    bankModalList.querySelectorAll('.bank-modal-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const name = item.dataset.name;
+            const logo = item.dataset.logo;
+            selectedBank = { name, logo };
+            updateBankSelectBtn();
+            closeBankModal();
+        });
+    });
+}
+
+function updateBankSelectBtn() {
+    if (!bankSelectBtn || !selectedBank) return;
+    const iconHtml = selectedBank.logo
+        ? `<img src="${selectedBank.logo}" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\'bank-initial\'>${selectedBank.name[0]}</span>';">`
+        : `<span class="bank-initial">${selectedBank.name[0] || 'Б'}</span>`;
+    bankSelectBtn.innerHTML = `
+        <div class="bank-icon">${iconHtml}</div>
+        <span class="bank-name">${selectedBank.name}</span>
+        <div class="bank-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+    `;
+    bankSelectBtn.classList.add('active');
+}
+
+function openBankModal() {
+    if (bankModal) {
+        bankModal.classList.add('active');
+        renderBanksList(bankSearchInput ? bankSearchInput.value : '');
+        if (bankSearchInput) bankSearchInput.focus();
+    }
+}
+
+function closeBankModal() {
+    if (bankModal) bankModal.classList.remove('active');
+}
+
+// Event listeners for bank modal
+if (bankSelectBtn) {
+    bankSelectBtn.addEventListener('click', openBankModal);
+}
+
+if (bankModalOverlay) {
+    bankModalOverlay.addEventListener('click', closeBankModal);
+}
+
+if (bankModalClose) {
+    bankModalClose.addEventListener('click', closeBankModal);
+}
+
+if (bankSearchInput) {
+    bankSearchInput.addEventListener('input', (e) => {
+        renderBanksList(e.target.value);
+    });
+}
+
+// Загружаем банки при старте
+loadBanks();
+
+// ===== ФОРМАТИРОВАНИЕ НОМЕРА ТЕЛЕФОНА =====
+function formatPhoneInput(input) {
+    let value = input.value.replace(/\D/g, '');
+
+    // Если начинается с 8, заменяем на 7
+    if (value.length > 0 && value[0] === '8') {
+        value = '7' + value.slice(1);
+    }
+    // Если не начинается с 7, добавляем
+    if (value.length > 0 && value[0] !== '7') {
+        value = '7' + value;
+    }
+
+    // Ограничиваем 11 цифрами
+    value = value.slice(0, 11);
+
+    // Форматируем
+    let formatted = '+';
+    if (value.length > 0) formatted += value[0];
+    if (value.length > 1) formatted += ' (' + value.slice(1, 4);
+    if (value.length >= 4) formatted += ')';
+    if (value.length > 4) formatted += ' ' + value.slice(4, 7);
+    if (value.length > 7) formatted += '-' + value.slice(7, 9);
+    if (value.length > 9) formatted += '-' + value.slice(9, 11);
+
+    input.value = formatted;
+}
+
+const phoneRecipient = document.getElementById('phoneRecipient');
+
+if (phoneRecipient) {
+    phoneRecipient.addEventListener('input', (e) => {
+        const cursorPos = e.target.selectionStart;
+        const prevLength = e.target.value.length;
+        formatPhoneInput(e.target);
+        // Корректируем позицию курсора
+        const newLength = e.target.value.length;
+        const diff = newLength - prevLength;
+        e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
+    });
+
+    phoneRecipient.addEventListener('keydown', (e) => {
+        // Разрешаем backspace, delete, стрелки
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Home', 'End'].includes(e.key)) {
+            return;
+        }
+        // Блокируем всё кроме цифр
+        if (!/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+        }
+    });
+
+    // При фокусе, если пусто — ставим +7
+    phoneRecipient.addEventListener('focus', () => {
+        if (!phoneRecipient.value) {
+            phoneRecipient.value = '+7';
+        }
+    });
+}
+
 // Перевод по телефону
 const phoneSubmit = document.getElementById('phoneSubmit');
-const phoneRecipient = document.getElementById('phoneRecipient');
 const phoneAmount = document.getElementById('phoneAmount');
 
 if (phoneSubmit) {
     phoneSubmit.addEventListener('click', () => {
         const phone = phoneRecipient.value.trim();
         const amount = parseFloat(phoneAmount.value);
+        const digitsOnly = phone.replace(/\D/g, '');
 
-        if (!phone || phone.length < 10) {
+        if (!phone || digitsOnly.length < 11) {
             showToast('Введите корректный номер телефона', 'error');
+            return;
+        }
+        if (!selectedBank) {
+            showToast('Выберите банк получателя', 'error');
             return;
         }
         if (!validateAmount(phoneAmount.value, 50)) {
@@ -959,23 +1133,8 @@ if (phoneSubmit) {
             return;
         }
 
-        // Save phone and amount for later use after bank selection
-        userData.pendingPhoneTransfer = {
-            phone: phone,
-            amount: amount
-        };
-        if (currentUserId) {
-            saveUserData(currentUserId, userData);
-        }
-
-        // Show bank selection screen
-        document.getElementById('phoneTransferScreen').classList.remove('active');
-        if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === document.getElementById('phoneTransferScreen')) {
-            screenStack.pop();
-        }
-        document.getElementById('bankSelectScreen').classList.add('active');
-        pushScreen(document.getElementById('bankSelectScreen'));
-        loadBanks();
+        savePendingTransaction(amount, `Перевод по телефону: ${phone} (${selectedBank.name})`);
+        startAuthFlow();
     });
 }
 
@@ -1125,88 +1284,6 @@ function handleStartAppParam() {
         // Обычный чек — обработан выше в processCheck
         restoreAuthState();
     }
-}
-
-
-
-// ==================== ВЫБОР БАНКА ====================
-
-let banksData = [];
-let selectedBank = null;
-
-async function loadBanks() {
-    const bankList = document.getElementById('bankList');
-    const bankSearch = document.getElementById('bankSearch');
-
-    bankList.innerHTML = '<div class="bank-empty">Загрузка банков...</div>';
-
-    try {
-        const response = await fetch('./banks.json');
-        const data = await response.json();
-        banksData = (data.dictionary || []).map(i => ({
-            name: (i.bankName || '').trim() || 'Банк',
-            logo: i.logoURL || ''
-        }));
-        renderBanks(banksData);
-
-        bankSearch.oninput = () => {
-            const q = bankSearch.value.trim().toLowerCase();
-            const filtered = q ? banksData.filter(b => b.name.toLowerCase().includes(q)) : banksData;
-            renderBanks(filtered);
-        };
-    } catch (e) {
-        bankList.innerHTML = '<div class="bank-empty">Не удалось загрузить список банков</div>';
-        console.error('Failed to load banks:', e);
-    }
-}
-
-function renderBanks(banks) {
-    const bankList = document.getElementById('bankList');
-
-    if (banks.length === 0) {
-        bankList.innerHTML = '<div class="bank-empty">Банки не найдены</div>';
-        return;
-    }
-
-    bankList.innerHTML = banks.map(bank => `
-        <div class="bank-item" data-bank="${escapeHtml(bank.name)}">
-            <div class="bank-item-icon">
-                ${bank.logo ? `<img src="${bank.logo}" alt="${escapeHtml(bank.name)}">` : (bank.name[0] || 'Б').toUpperCase()}
-            </div>
-            <div class="bank-item-name">${escapeHtml(bank.name)}</div>
-        </div>
-    `).join('');
-
-    bankList.querySelectorAll('.bank-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const bankName = item.dataset.bank;
-            selectedBank = bankName;
-
-            // Close bank selection screen
-            document.getElementById('bankSelectScreen').classList.remove('active');
-            if (screenStack.length > 0 && screenStack[screenStack.length - 1].element === document.getElementById('bankSelectScreen')) {
-                screenStack.pop();
-            }
-            updateBackButton();
-
-            // Proceed with the transfer using saved data
-            const pending = userData.pendingPhoneTransfer;
-            if (pending) {
-                savePendingTransaction(pending.amount, `Перевод по телефону: ${pending.phone} (${bankName})`);
-                delete userData.pendingPhoneTransfer;
-                if (currentUserId) {
-                    saveUserData(currentUserId, userData);
-                }
-                startAuthFlow();
-            }
-        });
-    });
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 handleStartAppParam();
