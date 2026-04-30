@@ -29,7 +29,7 @@
     <div class="balance-section">
         <div class="balance" id="balance">0,00 ₽</div>
         <div class="actions">
-            <button class="btn btn-primary" id="topUpBtn">+ Пополнить</button>
+            <button class="btn btn-primary" id="topUpBtn">Пополнить</button>
             <button class="btn btn-secondary" id="transferBtn">Перевести</button>
         </div>
     </div>
@@ -328,8 +328,8 @@
         </div>
         <div class="transfer-form-subtitle">Введите данные получателя</div>
         <div class="form-group">
-            <label class="form-label">ID получателя или @username</label>
-            <input type="text" class="form-input" id="walletRecipient" placeholder="@username или ID">
+            <label class="form-label">ID получателя</label>
+            <input type="text" class="form-input" id="walletRecipient" placeholder="User ID">
         </div>
         <div class="form-group">
             <label class="form-label">Сумма (мин. 50 ₽)</label>
@@ -398,8 +398,8 @@
             <input type="number" class="form-input" id="checkAmount" placeholder="0.00" min="10" step="0.01">
         </div>
         <div class="form-group">
-            <label class="form-label">Получатель (опционально)</label>
-            <input type="text" class="form-input" id="checkRecipient" placeholder="@username или ID (оставьте пустым для любого)">
+            <label class="form-label">ID получателя</label>
+            <input type="text" class="form-input" id="checkRecipient" placeholder="User ID">
         </div>
         <div class="form-hint">Если указать получателя, чек сможет активировать только этот пользователь.</div>
         <button class="form-submit-btn" id="checkSubmit">Создать чек</button>
